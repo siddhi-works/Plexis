@@ -72,4 +72,4 @@ Voice-only device (no browser): `qed voice` (add `--text` to type). Install the 
 - [SUBMISSION.md](SUBMISSION.md): the Devpost text
 - [DEMO_SCRIPT.md](DEMO_SCRIPT.md): the video script
 - [FRICTION_LOG.md](FRICTION_LOG.md) and [PRODUCT_FEEDBACK.md](PRODUCT_FEEDBACK.md)
-- [LICENSE](LICENSE): Apache-2.0
+- [LICENSE](LICENSE): MIT

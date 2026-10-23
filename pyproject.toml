@@ -3,7 +3,7 @@ name = "qed"
 version = "0.1.0"
 description = "QED: an intent compiler for Alexa+. Turns spoken requests into plans that come with a machine-checkable proof."
 readme = "README.md"
-license = { text = "Apache-2.0" }
+license = { text = "MIT" }
 requires-python = ">=3.11"
 authors = [{ name = "Plexis contributors" }]
 dependencies = [

@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "description": "A simulated Alexa+ host that is a real MCP client (initialize, tools/list, tools/call, elicitation, MCP Apps) for the QED add-on.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "scripts": {
     "dev": "vite --port 5173 --strictPort",
     "build": "tsc -b && vite build",
