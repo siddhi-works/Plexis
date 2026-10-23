@@ -412,8 +412,8 @@ class Dialog:
             draft.asked.add("unsupported")
             return await self._ask(draft, progress, lead=self._unsupported_lead(unknown))
         lead = self._region_lead(text, draft)
-        # Offer teaching only once the trip itself was understood; otherwise just ask the next question.
-        gap = self._gap_lead(intent) if intent.destination else ""
+        self.e.learner.note_gaps(intent)  # recorded quietly; teaching is offered at the preferences question
+        gap = ""
         return await self._ask(draft, progress, lead=" ".join(x for x in (gap, lead) if x))
 
     async def _answer(self, draft: Draft, text: str, progress: Any) -> Turn:

@@ -134,8 +134,13 @@ async def test_teaching_a_phrase_is_used_on_the_next_trip(engine: Engine) -> Non
 
 
 async def test_unknown_words_invite_teaching(engine: Engine) -> None:
-    (t,) = await talk(Dialog(engine), f"Plan 3 nights from Seattle to Boston on {WHEN} for 2, somewhere cozy")
-    assert "teach me" in t.speech and engine.learner.report()["unknownPhrases"]
+    first, then = await talk(
+        Dialog(engine),
+        f"Plan 3 nights from Seattle to Boston on {WHEN} for 2 under $3,000, kindly",
+        "somewhere cozy",
+    )
+    assert "teach me" not in first.speech, "no lecture on the first request"
+    assert "teach me" in then.speech and engine.learner.report()["unknownPhrases"]
 
 
 async def test_corrections_are_fixed_and_logged(engine: Engine) -> None:

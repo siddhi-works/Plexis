@@ -58,6 +58,7 @@ button, input, select { font: inherit; }
 .speech-screen { position: absolute; inset: 0; display: grid; align-content: center; gap: 14px; padding: 6% 8%; }
 .heard { margin: 0; color: var(--on-glass-dim); font-size: clamp(16px, 1.6vw, 20px); }
 .said { margin: 0; font-size: clamp(20px, 2.3vw, 30px); line-height: 1.3; max-width: 32ch; }
+.said.said-long { font-size: clamp(17px, 1.6vw, 22px); line-height: 1.4; max-width: 46ch; }
 .busy { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); background: #0d1b2cee; border: 1px solid #36c5f055; color: var(--on-glass); padding: 6px 16px; border-radius: 999px; font-size: 14px; }
 .alert { position: absolute; z-index: 3; top: 12px; left: 12px; right: 12px; background: #2a1414f2; border: 1px solid var(--conflict); border-radius: 12px; padding: 12px 14px; font-size: 17px; }
 .alert-actions { display: flex; gap: 10px; margin-top: 10px; }

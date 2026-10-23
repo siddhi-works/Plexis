@@ -264,7 +264,7 @@ export default function App() {
               ) : (
                 <div className="speech-screen">
                   <p className="heard">{listening ? (draft || "Listening…") : lastYou?.text ?? "Say “book a trip for me”, or tap the ring and talk."}</p>
-                  <p className="said">{lastAssistant?.text ?? ""}</p>
+                  <p className={`said${(lastAssistant?.text?.length ?? 0) > 140 ? " said-long" : ""}`}>{lastAssistant?.text ?? ""}</p>
                   {mode === "show" && suggestions.length > 0 && !busy && (
                     <div className="screen-choices">
                       {suggestions.map((s, i) => <button key={s} className={i === 0 ? "btn btn-go" : "btn"} onClick={() => submit(s)}>{s}</button>)}
