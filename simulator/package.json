@@ -1,0 +1,28 @@
+{
+  "name": "qed-alexa-plus-simulator",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "A simulated Alexa+ host that is a real MCP client (initialize, tools/list, tools/call, elicitation, MCP Apps) for the QED add-on.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "vite --port 5173 --strictPort",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --port 4173",
+    "typecheck": "tsc -b --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "@noble/ed25519": "^3.2.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5"
+  }
+}

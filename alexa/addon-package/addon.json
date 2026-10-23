@@ -1,0 +1,47 @@
+{
+  "manifestVersion": "1.0",
+  "publishingInformation": {
+    "locales": {
+      "en-US": {
+        "name": "Plexis",
+        "shortDescription": "Trips you can trust: every plan is solved, independently checked and signed, or Plexis proves it's impossible and offers fixes.",
+        "fullDescription": "Plexis plans complete trips (transport, lodging, meals and activities) from what you say, and only offers plans it can prove. Each plan is optimised by a constraint solver, re-checked by an independent verifier, cross-checked by a second solver, and signed into a tamper-evident receipt. If your request can't work, Plexis tells you exactly which requirements clash and the smallest change that fixes it. It remembers your household's needs only with your consent, watches booked trips for cancellations and re-plans automatically, suggests better dates when the weather looks bad, and prepares a packing and outfit brief.",
+        "examplePhrases": [
+          "Plan a weekend in Portland with Grandma under fifteen hundred dollars",
+          "Why not the Harbor Inn?",
+          "Make it cheaper and add a museum",
+          "Book it"
+        ],
+        "keywords": ["travel", "trip planning", "itinerary", "accessible travel", "family travel"],
+        "privacyPolicyUrl": "https://example.com/qed/privacy",
+        "termsOfUseUrl": "https://example.com/qed/terms",
+        "icons": {
+          "72": "assets/icon-72.png",
+          "64": "assets/icon-64.png",
+          "88": "assets/icon-88.png",
+          "126": "assets/icon-126.png",
+          "180": "assets/icon-180.png",
+          "241": "assets/icon-241.png"
+        },
+        "carousel": [
+          { "uri": "assets/carousel-1.png", "width": 600, "height": 900, "altText": "A verified trip card on an Echo Show listing flights, hotel, meals and a checklist of every requirement proven." }
+        ]
+      }
+    },
+    "category": "TRAVEL_AND_TRANSPORTATION"
+  },
+  "integrations": [
+    {
+      "type": "MCP",
+      "endpoint": { "type": "HTTPS", "uri": "https://qed.example.com/mcp" },
+      "protocolVersion": "2025-11-25",
+      "transport": "streamable-http",
+      "authorization": {
+        "serviceLevel": { "grantType": "client_credentials", "scopes": ["mcp:service"] },
+        "userLevel": { "grantType": "authorization_code", "pkce": "S256", "scopes": ["mcp:tools", "mcp:resources"] },
+        "protectedResourceMetadata": "https://qed.example.com/.well-known/oauth-protected-resource/mcp"
+      }
+    }
+  ],
+  "_comment": "Field names follow the Alexa+ MCP Toolkit quickstart's documented limits (name <= 30 chars, shortDescription <= 123, 3-4 example phrases <= 200 chars, six icon sizes, a 600x900 carousel image, HTTPS endpoint, integrations[].type = MCP). The Toolkit is in partner-only preview, so this file has not been validated by `alexa-ai deploy`; regenerate it with `alexa-ai new mcp` once access is granted and copy these values across. Replace the example.com URLs and add the image assets before submission."
+}

@@ -1,0 +1,53 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+      - name: Install
+        run: uv venv && uv pip install -e ".[dev]"
+      - name: Lint (ruff)
+        run: uv run ruff check src tests
+      - name: Security lint (bandit)
+        run: uv run bandit -q -r src -x src/qed/eval
+      - name: Dependency audit (pip-audit)
+        run: uvx pip-audit --skip-editable || true
+      - name: Tests (unit, property, contract, chaos) with coverage
+        env:
+          AWS_EC2_METADATA_DISABLED: "true"
+        run: uv run pytest -q --cov=qed --cov-report=term --cov-fail-under=70
+      - name: Benchmark (QED vs baselines)
+        run: uv run qed bench --n 40 --out eval/results-ci
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bench
+          path: eval/results-ci/bench.md
+
+  simulator:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: simulator
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: simulator/package-lock.json
+      - run: npm ci
+      - run: npx tsc -p tsconfig.json --noEmit
+      - run: npx vite build
+      - run: npm audit --audit-level=high

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plexis trip card</title>
+<style>
+  :root {
+    --bg: #0f1720; --panel: #17212c; --panel-2: #1e2a37; --ink: #f2f5f8; --muted: #9fb0c0;
+    --accent: #3ec9ff; --ok: #4ade80; --warn: #fbbf24; --err: #f87171; --line: #2a3a4a;
+    --scale: 1.6; --r: 14px;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) { --bg:#f6f8fb; --panel:#ffffff; --panel-2:#eef2f7; --ink:#0f1720; --muted:#516170; --line:#d7e0ea; --accent:#0b7fb8; --ok:#15803d; --warn:#a16207; --err:#b91c1c; }
+  }
+  :root[data-theme="light"] { --bg:#f6f8fb; --panel:#ffffff; --panel-2:#eef2f7; --ink:#0f1720; --muted:#516170; --line:#d7e0ea; --accent:#0b7fb8; --ok:#15803d; --warn:#a16207; --err:#b91c1c; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font: calc(10px * var(--scale)) / 1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body.compact { --scale: 1.15; }
+  main { padding: 0.9rem; display: grid; gap: 0.8rem; }
+  h1 { font-size: 1.45em; margin: 0; letter-spacing: -0.01em; }
+  h2 { font-size: 0.9em; margin: 0 0 0.45rem; color: var(--muted); font-weight: 600; }
+  .sub { color: var(--muted); }
+  .row { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 0.8rem; }
+  .badge { display: inline-flex; align-items: center; gap: .35em; padding: .15em .6em; border-radius: 999px; font-size: .78em; font-weight: 600; background: var(--panel-2); }
+  .badge.ok { color: var(--ok); } .badge.err { color: var(--err); } .badge.warn { color: var(--warn); }
+  .proof { display: flex; justify-content: space-between; gap: .6rem; align-items: center; }
+  .proof b { color: var(--ok); }
+  .money { font-variant-numeric: tabular-nums; }
+  .bar { display: flex; height: .7em; border-radius: 999px; overflow: hidden; background: var(--panel-2); margin: .4rem 0; }
+  .bar span { display: block; height: 100%; }
+  .legend { display: flex; flex-wrap: wrap; gap: .3rem .9rem; font-size: .8em; color: var(--muted); }
+  .dot { display: inline-block; width: .6em; height: .6em; border-radius: 50%; margin-right: .3em; }
+  .days { display: grid; gap: .6rem; }
+  .day { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: .7rem .8rem; }
+  .day header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .35rem; }
+  .item { display: grid; grid-template-columns: 4.6em 1.4em 1fr auto; gap: .5rem; padding: .3rem 0; border-top: 1px dashed var(--line); align-items: baseline; }
+  .item:first-of-type { border-top: 0; }
+  .item .t { color: var(--muted); font-variant-numeric: tabular-nums; font-size: .85em; }
+  .item .d { color: var(--muted); font-size: .8em; }
+  .rules { display: grid; gap: .3rem; }
+  .rule { display: grid; grid-template-columns: 1.3em 1fr; gap: .4rem; font-size: .88em; }
+  .rule .o { font-size: .72em; color: var(--muted); }
+  .src-user { color: var(--accent); } .src-profile { color: #c084fc; } .src-commonsense, .src-structure, .src-integrity, .src-arithmetic { color: var(--muted); } .src-default { color: var(--warn); } .src-policy { color: var(--err); }
+  .err { border-color: color-mix(in srgb, var(--err) 55%, var(--line)); }
+  pre.diag { margin: 0; white-space: pre-wrap; font: .82em/1.45 ui-monospace, "Cascadia Code", Consolas, monospace; color: var(--ink); }
+  pre.diag .e { color: var(--err); font-weight: 700; } pre.diag .n { color: var(--muted); } pre.diag .f { color: var(--ok); }
+  button { font: inherit; font-size: .85em; border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 999px; padding: .35em .9em; cursor: pointer; min-height: 44px; }
+  button.primary { background: var(--accent); color: #001018; font-weight: 700; }
+  button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .voice-only { display: none; }
+  body.voice main { display: none; } body.voice .voice-only { display: grid; place-items: center; height: 100vh; font-size: 1.4em; text-align: center; padding: 1rem; }
+  .empty { color: var(--muted); padding: 2rem; text-align: center; }
+  details summary { cursor: pointer; color: var(--muted); }
+  @media (prefers-reduced-motion: no-preference) { .day, .panel { animation: rise .25s ease-out both; } @keyframes rise { from { opacity: 0; transform: translateY(4px); } } }
+</style>
+</head>
+<body>
+<main id="root" aria-live="polite"><div class="empty">Waiting for a plan…</div></main>
+<div class="voice-only" id="voice" aria-live="polite"></div>
+<script>
+(() => {
+  const root = document.getElementById("root");
+  const voice = document.getElementById("voice");
+  let nextId = 10, pending = new Map(), last = null;
+  const post = (msg) => window.parent.postMessage(msg, "*");
+  const request = (method, params) => new Promise((resolve, reject) => {
+    const id = nextId++; pending.set(id, { resolve, reject }); post({ jsonrpc: "2.0", id, method, params });
+  });
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const money = (n) => n == null ? "" : "$" + Math.round(n).toLocaleString("en-US");
+  const ICON = { flight: "✈︎", train: "🚆", drive: "🚗", stay: "🛏", meal: "🍽", activity: "★" };
+  const ORIGIN = { user: "you said", profile: "your household", commonsense: "commonsense", default: "default", policy: "policy", structure: "structure", integrity: "data integrity", arithmetic: "arithmetic" };
+
+  function size() { post({ jsonrpc: "2.0", method: "ui/notifications/size-changed", params: { height: document.documentElement.scrollHeight } }); }
+
+  function render(result) {
+    last = result;
+    const sc = (result && (result.structuredContent || result.structured_content)) || {};
+    const d = sc.data || {};
+    voice.textContent = sc.speech || "";
+    if (sc.status === "infeasible") return renderConflict(sc, d);
+    if (!d.trip) { root.innerHTML = `<div class="empty">${esc(sc.speech || "No trip yet.")}</div>`; return size(); }
+    const t = d.trip, b = d.breakdown || {}, p = d.proof || {};
+    const segs = [["transport", "#3ec9ff"], ["lodging", "#a78bfa"], ["dining", "#fbbf24"], ["activities", "#4ade80"]];
+    const cap = Math.max(b.total || 1, d.budget || 0);
+    root.innerHTML = `
+      <section class="row" style="justify-content:space-between">
+        <div><h1>${esc(t.originName)} → ${esc(t.destName)}</h1>
+          <div class="sub">${esc(t.startDate)} · ${t.nights} night${t.nights > 1 ? "s" : ""} · ${t.travelers} traveler${t.travelers > 1 ? "s" : ""}${t.travelerNames?.length ? " incl. " + esc(t.travelerNames.join(", ")) : ""}</div></div>
+        <span class="badge ok" title="Every rule re-checked independently and signed">✓ Verified</span>
+      </section>
+      <section class="panel proof">
+        <div><b>${p.passed}/${p.checks}</b> checks proven · cross-checked by ${esc(p.z3 || "Z3")}<div class="sub" style="font-size:.78em">receipt #${p.ledgerIndex ?? "–"} · ${esc((p.certHash || "").slice(0, 16))}… · signed ${esc(p.keyId || "")}</div></div>
+        <div class="money" style="text-align:right"><div style="font-size:1.35em;font-weight:700">${money(b.total)}</div><div class="sub" style="font-size:.78em">${d.budget ? (d.budget === b.total ? "right on budget" : money(d.budget - b.total) + " under budget") : "total"}</div></div>
+      </section>
+      <section class="panel"><h2>Cost breakdown</h2>
+        <div class="bar" role="img" aria-label="Cost breakdown">${segs.map(([k, c]) => `<span style="width:${(100 * (b[k] || 0)) / cap}%;background:${c}"></span>`).join("")}</div>
+        <div class="legend">${segs.map(([k, c]) => `<span><i class="dot" style="background:${c}"></i>${k} ${money(b[k])}</span>`).join("")}${d.budget ? `<span>budget ${money(d.budget)}</span>` : ""}</div>
+      </section>
+      <section class="days">${(d.itinerary || []).map((day) => `
+        <article class="day"><header><strong>Day ${day.day} · ${esc(day.weekday)}</strong>
+          <span class="sub">${day.weather ? `${day.weather.icon} ${day.weather.highC}°/${day.weather.lowC}°C` : ""}</span></header>
+          ${day.items.map((it) => `<div class="item"><span class="t">${esc(it.time || "")}</span><span aria-hidden="true">${ICON[it.kind] || "•"}</span>
+            <span>${esc(it.title)}<div class="d">${esc(it.detail || "")}</div></span><span class="money sub">${it.price ? money(it.price) : ""}</span></div>`).join("")}
+        </article>`).join("")}</section>
+      <section class="panel"><h2>Why you can trust it</h2><div class="rules">${(d.rules || []).map((r) => `
+        <div class="rule"><span style="color:${r.passed ? "var(--ok)" : "var(--err)"}">${r.passed ? "✓" : "✗"}</span>
+          <span>${esc(r.text)} <span class="o src-${esc(r.origin)}">· ${esc(ORIGIN[r.origin] || r.origin)}${r.words ? ` “${esc(r.words)}”` : ""}${r.because ? ` — ${esc(r.because)}` : ""}</span>
+          <div class="d sub" style="font-size:.78em">${esc(r.evidence || "")}</div></span></div>`).join("")}</div></section>
+      ${d.highlights?.places?.length ? `<section class="panel"><h2>Worth seeing in ${esc(t.destName)}</h2><div class="rules">${d.highlights.places.slice(0, 5).map((p) => `<div class="rule"><span aria-hidden="true">★</span><span>${esc(p.name)}<div class="d sub" style="font-size:.78em">${esc(p.why)}</div></span></div>`).join("")}</div><div class="sub" style="font-size:.72em;margin-top:.4rem">Suggestions from ${esc(d.highlights.source)}. Not part of the verified plan.</div></section>` : ""}
+      ${d.untrusted?.length ? `<section class="panel"><span class="badge warn">⚠ ${d.untrusted.length} listing(s) contained instructions aimed at AI agents. They were ignored.</span></section>` : ""}
+      ${d.degraded?.length ? `<section class="panel"><span class="badge warn">${esc(d.degraded.join(" · "))}</span></section>` : ""}
+      ${d.weatherAdvice ? `<section class="panel row" style="justify-content:space-between"><span>${esc(d.weatherAdvice.message)}</span><button data-tool="check_better_dates">Check dates</button></section>` : ""}
+      <section class="row"><button class="primary" data-tool="book_trip">Book this trip</button><button data-tool="travel_brief">Travel brief</button></section>`;
+    wire(sc.planId);
+    size();
+  }
+
+  function renderConflict(sc, d) {
+    const c = d.conflict || {};
+    const lines = [`<span class="e">error[QED-E100]</span>: these requirements can't all hold together`];
+    (c.rules || []).forEach((r, i) => lines.push(`  <span class="n">${i === 0 ? "-->" : "   "}</span> ${esc(r)}  <span class="n">(${esc((c.origins || {})[c.mus?.[i]] || "")})</span>`));
+    lines.push(`<span class="n">  = proven minimal: drop any one and the rest is solvable</span>`);
+    lines.push(`<span class="n">  = confirmed independently by ${esc(d.proof?.z3 || "Z3")}</span>`);
+    (c.fixits || []).forEach((f) => lines.push(`<span class="f">fix-it</span>: ${esc(f.message)} → verified plan ${money(f.resulting_cost)}`));
+    root.innerHTML = `
+      <section><h1>That request is impossible</h1><div class="sub">No plan exists, and Plexis can prove it.</div></section>
+      <section class="panel err"><pre class="diag">${lines.join("\n")}</pre></section>
+      <section class="row">${(c.fixits || []).map((f) => `<button class="primary" data-fix="${esc(f.id)}">${esc(f.message)}</button>`).join("")}</section>
+      <section class="sub" style="font-size:.78em">Signed diagnosis · receipt #${d.proof?.ledgerIndex ?? "–"}</section>`;
+    root.querySelectorAll("[data-fix]").forEach((btn) => btn.addEventListener("click", async () => {
+      btn.disabled = true; btn.textContent = "Re-planning…";
+      try { render(await request("tools/call", { name: "refine_trip", arguments: { plan_id: sc.planId, change: "", fix_id: btn.dataset.fix } })); }
+      catch (e) { btn.textContent = "Couldn't apply fix"; }
+    }));
+    size();
+  }
+
+  function wire(planId) {
+    root.querySelectorAll("[data-tool]").forEach((btn) => btn.addEventListener("click", async () => {
+      const name = btn.dataset.tool; btn.disabled = true;
+      try {
+        const res = await request("tools/call", { name, arguments: { plan_id: planId } });
+        if (name === "book_trip" || name === "travel_brief" || name === "check_better_dates") {
+          post({ jsonrpc: "2.0", method: "ui/notifications/tool-called", params: { name, result: res } });
+          btn.textContent = name === "book_trip" ? "Booked ✓" : "Shown in conversation";
+        }
+      } catch (e) { btn.disabled = false; }
+    }));
+  }
+
+  window.addEventListener("message", (ev) => {
+    const m = ev.data; if (!m || m.jsonrpc !== "2.0") return;
+    if (m.id != null && pending.has(m.id)) { const p = pending.get(m.id); pending.delete(m.id); m.error ? p.reject(m.error) : p.resolve(m.result); return; }
+    if (m.method === "ui/notifications/tool-result") render(m.params);
+    if (m.method === "ui/notifications/host-context-changed") applyContext(m.params);
+  });
+  function applyContext(ctx) {
+    if (!ctx) return;
+    if (ctx.theme) document.documentElement.dataset.theme = ctx.theme;
+    document.body.classList.toggle("voice", ctx.displayMode === "voice-only");
+    document.body.classList.toggle("compact", ctx.displayMode === "inline");
+    size();
+  }
+  request("ui/initialize", { appInfo: { name: "qed-trip-card", version: "1.0.0" }, appCapabilities: {}, protocolVersion: "2025-11-21" })
+    .then((r) => { applyContext(r && r.hostContext); post({ jsonrpc: "2.0", method: "ui/notifications/initialized" }); })
+    .catch(() => {});
+  new ResizeObserver(size).observe(document.body);
+})();
+</script>
+</body>
+</html>

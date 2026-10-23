@@ -1,0 +1,1675 @@
+{
+  "summary": {
+    "requests": 80,
+    "compiled": 80,
+    "planned": 70,
+    "provenInfeasible": 10,
+    "qed": {
+      "validPlansPct": 100.0,
+      "z3AgreementPct": 100.0,
+      "infeasibleWithVerifiedFixitsPct": 100.0,
+      "meanConflictSize": 1.8,
+      "latencyMsP50": 88.9,
+      "latencyMsP95": 157.7,
+      "within500msPct": 100.0,
+      "meanParserCoverage": 1.0
+    },
+    "greedy": {
+      "validPlansPct": 13.8,
+      "invalidPlanOnImpossibleRequestPct": 100.0
+    },
+    "filterGreedy": {
+      "validPlansPct": 25.0,
+      "invalidPlanOnImpossibleRequestPct": 60.0
+    },
+    "note": "Valid = passes every check of the independent verifier on the same partner data. QED never returns an invalid plan by construction (it fails closed); for impossible requests it returns a proven-minimal conflict instead of a plan."
+  },
+  "rows": [
+    {
+      "id": 0,
+      "text": "Plan 1 night from Los Angeles to San Diego on December 7 for 1 person, rated 4.2+",
+      "tight": false,
+      "status": "planned",
+      "ms": 128.0,
+      "coverage": 1.0,
+      "solverMs": 12.83,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 179,
+      "greedy": "valid",
+      "greedyViolations": [],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 1,
+      "text": "Plan 2 nights from Portland to Seattle on November 16 for 1 person, a park",
+      "tight": false,
+      "status": "planned",
+      "ms": 82.6,
+      "coverage": 1.0,
+      "solverMs": 11.29,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 326,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "at least 1 park visit(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 park visit(s)"
+      ]
+    },
+    {
+      "id": 2,
+      "text": "Plan 5 nights from Seattle to San Francisco on November 14 for 2 people, 1 museums, no flights before 9am",
+      "tight": false,
+      "status": "planned",
+      "ms": 115.8,
+      "coverage": 1.0,
+      "solverMs": 20.92,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1986,
+      "greedy": "valid",
+      "greedyViolations": [],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 3,
+      "text": "Plan 5 nights from Seattle to Portland on November 16 for 1 person, relaxed pace, 1 museums, vegetarian, rated 4.8+",
+      "tight": false,
+      "status": "planned",
+      "ms": 131.5,
+      "coverage": 1.0,
+      "solverMs": 27.83,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1351,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "lodging rated 4.8+",
+        "every meal vegetarian friendly",
+        "0-1 activities per full day"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "every meal slot filled by an open restaurant that serves it",
+        "0-1 activities per full day"
+      ]
+    },
+    {
+      "id": 4,
+      "text": "Plan 2 nights from Portland to Seattle on December 8 for 3 people, vegetarian, under $1,332, no flights before 7am, rated 4.8+",
+      "tight": true,
+      "status": "planned",
+      "ms": 68.1,
+      "coverage": 1.0,
+      "solverMs": 8.21,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 807,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "lodging rated 4.8+",
+        "every meal vegetarian friendly"
+      ],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 5,
+      "text": "Plan 3 nights from Austin to Denver on December 10 for 4 people, under $5,536, at least one Mexican dinner, rated 4.5+",
+      "tight": false,
+      "status": "planned",
+      "ms": 112.5,
+      "coverage": 1.0,
+      "solverMs": 20.9,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 2398,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "lodging rated 4.5+",
+        "at least 1 mexican meal(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 mexican meal(s)"
+      ]
+    },
+    {
+      "id": 6,
+      "text": "Plan 1 night from Nashville to New York on December 13 for 2 people, no red-eye, vegetarian, 1 museums",
+      "tight": false,
+      "status": "planned",
+      "ms": 66.1,
+      "coverage": 1.0,
+      "solverMs": 6.64,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 821,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "enough seats left for every traveler",
+        "no overnight (red-eye) departures",
+        "at least 1 museum visit(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 museum visit(s)"
+      ]
+    },
+    {
+      "id": 7,
+      "text": "Plan 2 nights from Miami to Chicago on December 19 for 3 people, vegetarian, 2 museums",
+      "tight": false,
+      "status": "planned",
+      "ms": 68.2,
+      "coverage": 1.0,
+      "solverMs": 8.4,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 2275,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "every meal vegetarian friendly",
+        "at least 2 museum visit(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 2 museum visit(s)"
+      ]
+    },
+    {
+      "id": 8,
+      "text": "Plan 1 night from Nashville to New York on December 7 for 4 people, nonstop",
+      "tight": false,
+      "status": "planned",
+      "ms": 53.5,
+      "coverage": 1.0,
+      "solverMs": 4.65,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1713,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "enough seats left for every traveler"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "enough seats left for every traveler"
+      ]
+    },
+    {
+      "id": 9,
+      "text": "Plan 1 night from Portland to Seattle on November 15 for 1 person, rated 4.2+",
+      "tight": false,
+      "status": "planned",
+      "ms": 48.2,
+      "coverage": 1.0,
+      "solverMs": 3.95,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 238,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "lodging rated 4.2+"
+      ],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 10,
+      "text": "Plan 3 nights from Nashville to New York on November 28 for 3 people, at least one Mexican dinner",
+      "tight": false,
+      "status": "planned",
+      "ms": 96.3,
+      "coverage": 1.0,
+      "solverMs": 14.16,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 2368,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "at least 1 mexican meal(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 mexican meal(s)"
+      ]
+    },
+    {
+      "id": 11,
+      "text": "Plan 3 nights from Portland to Seattle on December 3 for 4 people, 1 museums, under $4,368",
+      "tight": false,
+      "status": "planned",
+      "ms": 111.6,
+      "coverage": 1.0,
+      "solverMs": 22.56,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1476,
+      "greedy": "valid",
+      "greedyViolations": [],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 12,
+      "text": "Plan 3 nights from Austin to Denver on November 17 for 3 people, nonstop, 1 museums, a park",
+      "tight": false,
+      "status": "planned",
+      "ms": 79.3,
+      "coverage": 1.0,
+      "solverMs": 14.67,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1746,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "nonstop only",
+        "at least 1 park visit(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 park visit(s)"
+      ]
+    },
+    {
+      "id": 13,
+      "text": "Plan 3 nights from Seattle to San Francisco on December 12 for 2 people, at least one Thai dinner, rated 4.2+, a park",
+      "tight": false,
+      "status": "planned",
+      "ms": 90.5,
+      "coverage": 1.0,
+      "solverMs": 17.24,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1489,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "lodging rated 4.2+",
+        "at least 1 thai meal(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 thai meal(s)"
+      ]
+    },
+    {
+      "id": 14,
+      "text": "Plan 1 night from Los Angeles to San Diego on November 17 for 4 people, at least one Indian dinner, no red-eye",
+      "tight": false,
+      "status": "infeasible",
+      "ms": 43.7,
+      "coverage": 1.0,
+      "solverMs": 0.18,
+      "z3": "unsat",
+      "qedValid": null,
+      "mus": 1,
+      "fixits": 1,
+      "fixitsVerified": true,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "at least 1 indian meal(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 indian meal(s)"
+      ]
+    },
+    {
+      "id": 15,
+      "text": "Plan 2 nights from Seattle to Portland on November 22 for 1 person, relaxed pace, no red-eye, at least one Italian dinner, rated 4.2+",
+      "tight": true,
+      "status": "planned",
+      "ms": 76.3,
+      "coverage": 1.0,
+      "solverMs": 12.21,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 295,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "at least 1 italian meal(s)",
+        "0-1 activities per full day"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 italian meal(s)",
+        "0-1 activities per full day"
+      ]
+    },
+    {
+      "id": 16,
+      "text": "Plan 2 nights from San Diego to Los Angeles on December 8 for 1 person, at least one Italian dinner, a park, 1 museums",
+      "tight": false,
+      "status": "planned",
+      "ms": 74.6,
+      "coverage": 1.0,
+      "solverMs": 9.82,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 365,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "at least 1 italian meal(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 italian meal(s)"
+      ]
+    },
+    {
+      "id": 17,
+      "text": "Plan 1 night from New York to Boston on December 21 for 1 person, no flights before 7am, 1 museums, under $972, nonstop",
+      "tight": false,
+      "status": "planned",
+      "ms": 60.5,
+      "coverage": 1.0,
+      "solverMs": 5.92,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 261,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "at least 1 museum visit(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 museum visit(s)"
+      ]
+    },
+    {
+      "id": 18,
+      "text": "Plan 5 nights from Phoenix to Las Vegas on December 12 for 2 people, 2 museums, nonstop, at least one Italian dinner",
+      "tight": false,
+      "status": "planned",
+      "ms": 139.5,
+      "coverage": 1.0,
+      "solverMs": 33.72,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1458,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "every meal slot filled by an open restaurant that serves it",
+        "nonstop only"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "every meal slot filled by an open restaurant that serves it"
+      ]
+    },
+    {
+      "id": 19,
+      "text": "Plan 3 nights from Seattle to Portland on November 21 for 2 people, at least one Mexican dinner, nonstop",
+      "tight": false,
+      "status": "planned",
+      "ms": 103.6,
+      "coverage": 1.0,
+      "solverMs": 17.6,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 712,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "at least 1 mexican meal(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 mexican meal(s)"
+      ]
+    },
+    {
+      "id": 20,
+      "text": "Plan 3 nights from New York to Nashville on December 7 for 4 people, no flights before 8am, rated 4.2+, under $2,496",
+      "tight": true,
+      "status": "planned",
+      "ms": 91.6,
+      "coverage": 1.0,
+      "solverMs": 16.13,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 2490,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "enough seats left for every traveler",
+        "outbound departs at or after 8:00 am",
+        "lodging rated 4.2+"
+      ],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 21,
+      "text": "Plan 1 night from Austin to Denver on November 16 for 2 people, no flights before 8am",
+      "tight": false,
+      "status": "planned",
+      "ms": 53.3,
+      "coverage": 1.0,
+      "solverMs": 4.18,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 869,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "outbound departs at or after 8:00 am"
+      ],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 22,
+      "text": "Plan 3 nights from Austin to Denver on December 9 for 4 people, rated 4.2+, no flights before 8am, wheelchair accessible hotel, under $1,968",
+      "tight": true,
+      "status": "planned",
+      "ms": 93.9,
+      "coverage": 1.0,
+      "solverMs": 17.31,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1585,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "enough seats left for every traveler",
+        "total cost at most $1,968",
+        "step-free, wheelchair-accessible lodging"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "enough seats left for every traveler",
+        "total cost at most $1,968"
+      ]
+    },
+    {
+      "id": 23,
+      "text": "Plan 5 nights from Portland to Seattle on December 3 for 4 people, a park, no red-eye, under $8,712",
+      "tight": false,
+      "status": "planned",
+      "ms": 124.5,
+      "coverage": 1.0,
+      "solverMs": 26.3,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 2564,
+      "greedy": "valid",
+      "greedyViolations": [],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 24,
+      "text": "Plan 2 nights from Austin to Denver on December 15 for 3 people, wheelchair accessible hotel, rated 4.8+",
+      "tight": false,
+      "status": "infeasible",
+      "ms": 97.8,
+      "coverage": 1.0,
+      "solverMs": 0.97,
+      "z3": "unsat",
+      "qedValid": null,
+      "mus": 3,
+      "fixits": 2,
+      "fixitsVerified": true,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "step-free, wheelchair-accessible lodging",
+        "lodging rated 4.8+"
+      ],
+      "filterGreedy": "no_plan"
+    },
+    {
+      "id": 25,
+      "text": "Plan 4 nights from Chicago to Miami on November 18 for 4 people, 2 museums, wheelchair accessible hotel, nonstop, relaxed pace",
+      "tight": false,
+      "status": "planned",
+      "ms": 109.3,
+      "coverage": 1.0,
+      "solverMs": 17.75,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 3802,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "nonstop only",
+        "at least 2 museum visit(s)",
+        "0-1 activities per full day"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 2 museum visit(s)",
+        "0-1 activities per full day"
+      ]
+    },
+    {
+      "id": 26,
+      "text": "Plan 1 night from Austin to Denver on November 30 for 4 people, at least one Indian dinner, under $752, wheelchair accessible hotel",
+      "tight": true,
+      "status": "infeasible",
+      "ms": 64.5,
+      "coverage": 1.0,
+      "solverMs": 0.62,
+      "z3": "unsat (cost floor $756 > $752)",
+      "qedValid": null,
+      "mus": 1,
+      "fixits": 1,
+      "fixitsVerified": true,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "total cost at most $752",
+        "step-free, wheelchair-accessible lodging",
+        "at least 1 indian meal(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "total cost at most $752",
+        "at least 1 indian meal(s)"
+      ]
+    },
+    {
+      "id": 27,
+      "text": "Plan 4 nights from San Francisco to Seattle on November 17 for 3 people, nonstop, 2 museums",
+      "tight": false,
+      "status": "planned",
+      "ms": 108.8,
+      "coverage": 1.0,
+      "solverMs": 16.06,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 2614,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "enough seats left for every traveler",
+        "nonstop only",
+        "at least 2 museum visit(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 2 museum visit(s)"
+      ]
+    },
+    {
+      "id": 28,
+      "text": "Plan 2 nights from San Francisco to Seattle on December 22 for 1 person, relaxed pace, a park",
+      "tight": false,
+      "status": "planned",
+      "ms": 66.8,
+      "coverage": 1.0,
+      "solverMs": 10.71,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 606,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "at least 1 park visit(s)",
+        "0-1 activities per full day"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 park visit(s)",
+        "0-1 activities per full day"
+      ]
+    },
+    {
+      "id": 29,
+      "text": "Plan 2 nights from New York to Nashville on December 14 for 1 person, no flights before 7am, under $1,356",
+      "tight": false,
+      "status": "planned",
+      "ms": 72.5,
+      "coverage": 1.0,
+      "solverMs": 10.8,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 496,
+      "greedy": "valid",
+      "greedyViolations": [],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 30,
+      "text": "Plan 1 night from Phoenix to Las Vegas on December 22 for 2 people, at least one Thai dinner",
+      "tight": false,
+      "status": "planned",
+      "ms": 51.3,
+      "coverage": 1.0,
+      "solverMs": 4.58,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 482,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "at least 1 thai meal(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 thai meal(s)"
+      ]
+    },
+    {
+      "id": 31,
+      "text": "Plan 3 nights from Las Vegas to Phoenix on November 16 for 2 people, nonstop, at least one Thai dinner",
+      "tight": false,
+      "status": "planned",
+      "ms": 82.5,
+      "coverage": 1.0,
+      "solverMs": 11.09,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 826,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "nonstop only"
+      ],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 32,
+      "text": "Plan 3 nights from Seattle to Portland on December 3 for 3 people, under $3,492, at least one Thai dinner",
+      "tight": false,
+      "status": "planned",
+      "ms": 96.7,
+      "coverage": 1.0,
+      "solverMs": 24.15,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1117,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "at least 1 thai meal(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 thai meal(s)"
+      ]
+    },
+    {
+      "id": 33,
+      "text": "Plan 3 nights from Las Vegas to Phoenix on December 15 for 4 people, 2 museums",
+      "tight": false,
+      "status": "planned",
+      "ms": 76.5,
+      "coverage": 1.0,
+      "solverMs": 14.37,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1726,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "enough seats left for every traveler",
+        "at least 2 museum visit(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "enough seats left for every traveler",
+        "at least 2 museum visit(s)"
+      ]
+    },
+    {
+      "id": 34,
+      "text": "Plan 5 nights from San Francisco to Seattle on November 16 for 4 people, nonstop, relaxed pace, no flights before 9am, 1 museums",
+      "tight": false,
+      "status": "planned",
+      "ms": 111.3,
+      "coverage": 1.0,
+      "solverMs": 27.22,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 3802,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "enough seats left for every traveler",
+        "nonstop only",
+        "0-1 activities per full day"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "0-1 activities per full day"
+      ]
+    },
+    {
+      "id": 35,
+      "text": "Plan 4 nights from Seattle to San Francisco on December 10 for 3 people, rated 4.2+, vegetarian, relaxed pace, no flights before 7am",
+      "tight": false,
+      "status": "planned",
+      "ms": 117.1,
+      "coverage": 1.0,
+      "solverMs": 22.73,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 2565,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "enough seats left for every traveler",
+        "every meal vegetarian friendly",
+        "0-1 activities per full day"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "enough seats left for every traveler",
+        "0-1 activities per full day"
+      ]
+    },
+    {
+      "id": 36,
+      "text": "Plan 1 night from Los Angeles to San Diego on November 29 for 3 people, relaxed pace, no red-eye, nonstop",
+      "tight": true,
+      "status": "planned",
+      "ms": 49.4,
+      "coverage": 1.0,
+      "solverMs": 5.16,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 374,
+      "greedy": "valid",
+      "greedyViolations": [],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 37,
+      "text": "Plan 4 nights from Seattle to San Francisco on December 8 for 2 people, at least one Mexican dinner, under $4,350, 2 museums",
+      "tight": false,
+      "status": "planned",
+      "ms": 129.5,
+      "coverage": 1.0,
+      "solverMs": 29.55,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1806,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "at least 1 mexican meal(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 mexican meal(s)"
+      ]
+    },
+    {
+      "id": 38,
+      "text": "Plan 4 nights from New York to Nashville on December 1 for 4 people, no flights before 9am, nonstop",
+      "tight": true,
+      "status": "planned",
+      "ms": 126.8,
+      "coverage": 1.0,
+      "solverMs": 23.95,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 2946,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "enough seats left for every traveler",
+        "nonstop only"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "enough seats left for every traveler"
+      ]
+    },
+    {
+      "id": 39,
+      "text": "Plan 3 nights from Miami to Chicago on November 23 for 1 person, wheelchair accessible hotel, a park, nonstop",
+      "tight": false,
+      "status": "planned",
+      "ms": 86.8,
+      "coverage": 1.0,
+      "solverMs": 11.11,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 793,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "nonstop only",
+        "at least 1 park visit(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 park visit(s)"
+      ]
+    },
+    {
+      "id": 40,
+      "text": "Plan 2 nights from Austin to Denver on December 5 for 2 people, vegetarian, relaxed pace",
+      "tight": true,
+      "status": "planned",
+      "ms": 88.6,
+      "coverage": 1.0,
+      "solverMs": 13.09,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 904,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "0-1 activities per full day"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "0-1 activities per full day"
+      ]
+    },
+    {
+      "id": 41,
+      "text": "Plan 1 night from Phoenix to Las Vegas on December 13 for 1 person, at least one Thai dinner, nonstop, no flights before 7am, a park",
+      "tight": false,
+      "status": "planned",
+      "ms": 63.4,
+      "coverage": 1.0,
+      "solverMs": 3.01,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 326,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "nonstop only",
+        "at least 1 thai meal(s)",
+        "at least 1 park visit(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 thai meal(s)",
+        "at least 1 park visit(s)"
+      ]
+    },
+    {
+      "id": 42,
+      "text": "Plan 5 nights from Portland to Seattle on December 1 for 2 people, a park, under $4,824",
+      "tight": false,
+      "status": "planned",
+      "ms": 157.7,
+      "coverage": 1.0,
+      "solverMs": 35.43,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1533,
+      "greedy": "valid",
+      "greedyViolations": [],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 43,
+      "text": "Plan 4 nights from Los Angeles to San Diego on November 27 for 2 people, vegetarian",
+      "tight": false,
+      "status": "planned",
+      "ms": 102.0,
+      "coverage": 1.0,
+      "solverMs": 16.92,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1230,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "every meal vegetarian friendly"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "every meal slot filled by an open restaurant that serves it"
+      ]
+    },
+    {
+      "id": 44,
+      "text": "Plan 1 night from San Francisco to Seattle on December 8 for 3 people, rated 4.5+, nonstop, at least one Thai dinner, under $918",
+      "tight": true,
+      "status": "infeasible",
+      "ms": 93.3,
+      "coverage": 1.0,
+      "solverMs": 0.7,
+      "z3": "unsat",
+      "qedValid": null,
+      "mus": 2,
+      "fixits": 2,
+      "fixitsVerified": true,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "total cost at most $918",
+        "nonstop only",
+        "lodging rated 4.5+",
+        "at least 1 thai meal(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "total cost at most $918",
+        "at least 1 thai meal(s)"
+      ]
+    },
+    {
+      "id": 45,
+      "text": "Plan 2 nights from Miami to Chicago on November 24 for 4 people, no flights before 9am, a park, at least one Italian dinner",
+      "tight": true,
+      "status": "planned",
+      "ms": 78.6,
+      "coverage": 1.0,
+      "solverMs": 10.09,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 2687,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "enough seats left for every traveler",
+        "at least 1 italian meal(s)",
+        "at least 1 park visit(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "enough seats left for every traveler",
+        "at least 1 italian meal(s)",
+        "at least 1 park visit(s)"
+      ]
+    },
+    {
+      "id": 46,
+      "text": "Plan 2 nights from New York to Boston on November 15 for 4 people, no flights before 8am, relaxed pace, no red-eye",
+      "tight": false,
+      "status": "planned",
+      "ms": 95.3,
+      "coverage": 1.0,
+      "solverMs": 13.07,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 898,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "outbound departs at or after 8:00 am",
+        "0-1 activities per full day"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "0-1 activities per full day"
+      ]
+    },
+    {
+      "id": 47,
+      "text": "Plan 3 nights from San Francisco to Seattle on November 17 for 4 people, 2 museums",
+      "tight": false,
+      "status": "planned",
+      "ms": 87.6,
+      "coverage": 1.0,
+      "solverMs": 17.14,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 2512,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "at least 2 museum visit(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 2 museum visit(s)"
+      ]
+    },
+    {
+      "id": 48,
+      "text": "Plan 2 nights from Nashville to New York on December 12 for 3 people, nonstop, rated 4.5+, a park, at least one Thai dinner",
+      "tight": false,
+      "status": "planned",
+      "ms": 81.0,
+      "coverage": 1.0,
+      "solverMs": 10.53,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1814,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "enough seats left for every traveler",
+        "nonstop only",
+        "lodging rated 4.5+",
+        "at least 1 thai meal(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "enough seats left for every traveler",
+        "at least 1 thai meal(s)",
+        "at least 1 park visit(s)"
+      ]
+    },
+    {
+      "id": 49,
+      "text": "Plan 1 night from San Diego to Los Angeles on December 21 for 3 people, wheelchair accessible hotel, relaxed pace, under $2,742",
+      "tight": false,
+      "status": "planned",
+      "ms": 61.4,
+      "coverage": 1.0,
+      "solverMs": 5.9,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 460,
+      "greedy": "valid",
+      "greedyViolations": [],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 50,
+      "text": "Plan 2 nights from Austin to Denver on December 13 for 4 people, no red-eye, a park, nonstop",
+      "tight": true,
+      "status": "planned",
+      "ms": 87.3,
+      "coverage": 1.0,
+      "solverMs": 10.79,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 2208,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "no overnight (red-eye) departures",
+        "nonstop only",
+        "at least 1 park visit(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "enough seats left for every traveler",
+        "at least 1 park visit(s)"
+      ]
+    },
+    {
+      "id": 51,
+      "text": "Plan 3 nights from San Francisco to Seattle on December 16 for 2 people, no flights before 8am",
+      "tight": false,
+      "status": "planned",
+      "ms": 85.2,
+      "coverage": 1.0,
+      "solverMs": 16.69,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1250,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "outbound departs at or after 8:00 am"
+      ],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 52,
+      "text": "Plan 2 nights from Portland to Seattle on December 10 for 2 people, a park, nonstop, 1 museums, no flights before 7am",
+      "tight": true,
+      "status": "planned",
+      "ms": 75.6,
+      "coverage": 1.0,
+      "solverMs": 10.3,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 636,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "at least 1 park visit(s)",
+        "at least 1 museum visit(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 park visit(s)",
+        "at least 1 museum visit(s)"
+      ]
+    },
+    {
+      "id": 53,
+      "text": "Plan 2 nights from San Diego to Los Angeles on November 28 for 2 people, relaxed pace",
+      "tight": false,
+      "status": "planned",
+      "ms": 84.9,
+      "coverage": 1.0,
+      "solverMs": 12.4,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 541,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "0-1 activities per full day"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "0-1 activities per full day"
+      ]
+    },
+    {
+      "id": 54,
+      "text": "Plan 4 nights from Phoenix to Las Vegas on November 26 for 3 people, nonstop, no flights before 8am, under $1,845",
+      "tight": true,
+      "status": "planned",
+      "ms": 164.7,
+      "coverage": 1.0,
+      "solverMs": 30.76,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1754,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "every meal slot filled by an open restaurant that serves it",
+        "enough seats left for every traveler",
+        "total cost at most $1,845",
+        "outbound departs at or after 8:00 am"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "every meal slot filled by an open restaurant that serves it",
+        "enough seats left for every traveler",
+        "total cost at most $1,845"
+      ]
+    },
+    {
+      "id": 55,
+      "text": "Plan 5 nights from San Francisco to Seattle on December 20 for 3 people, rated 4.5+, no red-eye, under $2,034",
+      "tight": true,
+      "status": "infeasible",
+      "ms": 308.6,
+      "coverage": 1.0,
+      "solverMs": 10.41,
+      "z3": "unsat (cost floor $2,286 > $2,034)",
+      "qedValid": null,
+      "mus": 2,
+      "fixits": 1,
+      "fixitsVerified": true,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "total cost at most $2,034",
+        "lodging rated 4.5+"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "total cost at most $2,034"
+      ]
+    },
+    {
+      "id": 56,
+      "text": "Plan 4 nights from Denver to Austin on November 14 for 4 people, vegetarian",
+      "tight": true,
+      "status": "planned",
+      "ms": 97.6,
+      "coverage": 1.0,
+      "solverMs": 18.86,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 3154,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "every meal vegetarian friendly"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "every meal slot filled by an open restaurant that serves it"
+      ]
+    },
+    {
+      "id": 57,
+      "text": "Plan 4 nights from New York to Boston on November 29 for 3 people, under $7,095, wheelchair accessible hotel, rated 4.5+, vegetarian",
+      "tight": false,
+      "status": "infeasible",
+      "ms": 148.0,
+      "coverage": 1.0,
+      "solverMs": 0.92,
+      "z3": "unsat",
+      "qedValid": null,
+      "mus": 2,
+      "fixits": 2,
+      "fixitsVerified": true,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "every meal slot filled by an open restaurant that serves it",
+        "step-free, wheelchair-accessible lodging",
+        "lodging rated 4.5+",
+        "every meal vegetarian friendly"
+      ],
+      "filterGreedy": "no_plan"
+    },
+    {
+      "id": 58,
+      "text": "Plan 4 nights from Portland to Seattle on December 5 for 2 people, 1 museums",
+      "tight": true,
+      "status": "planned",
+      "ms": 109.6,
+      "coverage": 1.0,
+      "solverMs": 21.1,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1203,
+      "greedy": "valid",
+      "greedyViolations": [],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 59,
+      "text": "Plan 2 nights from Los Angeles to San Diego on November 22 for 3 people, no flights before 8am, relaxed pace",
+      "tight": false,
+      "status": "planned",
+      "ms": 72.2,
+      "coverage": 1.0,
+      "solverMs": 12.4,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 683,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "outbound departs at or after 8:00 am",
+        "0-1 activities per full day"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "0-1 activities per full day"
+      ]
+    },
+    {
+      "id": 60,
+      "text": "Plan 4 nights from Seattle to San Francisco on December 22 for 1 person, relaxed pace, nonstop",
+      "tight": false,
+      "status": "planned",
+      "ms": 128.4,
+      "coverage": 1.0,
+      "solverMs": 24.84,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 914,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "nonstop only",
+        "0-1 activities per full day"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "0-1 activities per full day"
+      ]
+    },
+    {
+      "id": 61,
+      "text": "Plan 4 nights from New York to Nashville on November 22 for 3 people, nonstop, under $1,575",
+      "tight": true,
+      "status": "planned",
+      "ms": 128.0,
+      "coverage": 1.0,
+      "solverMs": 27.58,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1558,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "enough seats left for every traveler",
+        "total cost at most $1,575",
+        "nonstop only"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "enough seats left for every traveler",
+        "total cost at most $1,575"
+      ]
+    },
+    {
+      "id": 62,
+      "text": "Plan 3 nights from New York to Nashville on December 17 for 4 people, vegetarian, relaxed pace",
+      "tight": false,
+      "status": "planned",
+      "ms": 99.3,
+      "coverage": 1.0,
+      "solverMs": 16.72,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 2526,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "enough seats left for every traveler",
+        "0-1 activities per full day"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "enough seats left for every traveler",
+        "0-1 activities per full day"
+      ]
+    },
+    {
+      "id": 63,
+      "text": "Plan 4 nights from Las Vegas to Phoenix on December 21 for 2 people, no flights before 8am, relaxed pace, no red-eye, rated 4.8+",
+      "tight": false,
+      "status": "infeasible",
+      "ms": 128.8,
+      "coverage": 1.0,
+      "solverMs": 1.06,
+      "z3": "unsat",
+      "qedValid": null,
+      "mus": 1,
+      "fixits": 1,
+      "fixitsVerified": true,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "lodging rated 4.8+",
+        "0-1 activities per full day"
+      ],
+      "filterGreedy": "no_plan"
+    },
+    {
+      "id": 64,
+      "text": "Plan 1 night from New York to Nashville on November 20 for 1 person, nonstop",
+      "tight": false,
+      "status": "planned",
+      "ms": 51.9,
+      "coverage": 1.0,
+      "solverMs": 5.44,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 399,
+      "greedy": "valid",
+      "greedyViolations": [],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 65,
+      "text": "Plan 5 nights from Miami to Chicago on December 4 for 3 people, at least one Italian dinner, no red-eye, wheelchair accessible hotel",
+      "tight": true,
+      "status": "planned",
+      "ms": 122.5,
+      "coverage": 1.0,
+      "solverMs": 26.26,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 3513,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "every meal slot filled by an open restaurant that serves it",
+        "no overnight (red-eye) departures",
+        "step-free, wheelchair-accessible lodging",
+        "at least 1 italian meal(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "every meal slot filled by an open restaurant that serves it",
+        "at least 1 italian meal(s)"
+      ]
+    },
+    {
+      "id": 66,
+      "text": "Plan 3 nights from Nashville to New York on November 29 for 4 people, no flights before 9am, 2 museums, under $1,968",
+      "tight": true,
+      "status": "infeasible",
+      "ms": 477.7,
+      "coverage": 1.0,
+      "solverMs": 15.4,
+      "z3": "unsat",
+      "qedValid": null,
+      "mus": 3,
+      "fixits": 2,
+      "fixitsVerified": true,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "enough seats left for every traveler",
+        "total cost at most $1,968",
+        "at least 2 museum visit(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "enough seats left for every traveler",
+        "total cost at most $1,968",
+        "at least 2 museum visit(s)"
+      ]
+    },
+    {
+      "id": 67,
+      "text": "Plan 2 nights from New York to Nashville on December 18 for 3 people, at least one Thai dinner",
+      "tight": false,
+      "status": "planned",
+      "ms": 75.4,
+      "coverage": 1.0,
+      "solverMs": 10.0,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1710,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "enough seats left for every traveler",
+        "at least 1 thai meal(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "enough seats left for every traveler",
+        "at least 1 thai meal(s)"
+      ]
+    },
+    {
+      "id": 68,
+      "text": "Plan 3 nights from Denver to Austin on December 19 for 1 person, no red-eye, wheelchair accessible hotel",
+      "tight": false,
+      "status": "planned",
+      "ms": 92.6,
+      "coverage": 1.0,
+      "solverMs": 15.63,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1143,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "step-free, wheelchair-accessible lodging"
+      ],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 69,
+      "text": "Plan 1 night from Las Vegas to Phoenix on November 14 for 1 person, wheelchair accessible hotel, no flights before 9am, 1 museums",
+      "tight": true,
+      "status": "planned",
+      "ms": 59.7,
+      "coverage": 1.0,
+      "solverMs": 6.5,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 333,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "outbound departs at or after 9:00 am",
+        "step-free, wheelchair-accessible lodging",
+        "at least 1 museum visit(s)"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "at least 1 museum visit(s)"
+      ]
+    },
+    {
+      "id": 70,
+      "text": "Plan 2 nights from New York to Boston on November 27 for 4 people, relaxed pace, wheelchair accessible hotel",
+      "tight": true,
+      "status": "planned",
+      "ms": 88.9,
+      "coverage": 1.0,
+      "solverMs": 13.39,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1787,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "step-free, wheelchair-accessible lodging",
+        "0-1 activities per full day"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "0-1 activities per full day"
+      ]
+    },
+    {
+      "id": 71,
+      "text": "Plan 1 night from Las Vegas to Phoenix on November 12 for 1 person, no red-eye, nonstop, relaxed pace, under $568",
+      "tight": false,
+      "status": "planned",
+      "ms": 72.6,
+      "coverage": 1.0,
+      "solverMs": 8.02,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 258,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "nonstop only"
+      ],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 72,
+      "text": "Plan 4 nights from Phoenix to Las Vegas on November 12 for 4 people, no flights before 7am, at least one Indian dinner, no red-eye, nonstop",
+      "tight": false,
+      "status": "planned",
+      "ms": 121.4,
+      "coverage": 1.0,
+      "solverMs": 28.05,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 2255,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "every meal slot filled by an open restaurant that serves it",
+        "enough seats left for every traveler",
+        "no overnight (red-eye) departures",
+        "nonstop only"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "every meal slot filled by an open restaurant that serves it"
+      ]
+    },
+    {
+      "id": 73,
+      "text": "Plan 2 nights from San Francisco to Seattle on November 27 for 2 people, nonstop, vegetarian, rated 4.8+",
+      "tight": false,
+      "status": "planned",
+      "ms": 76.8,
+      "coverage": 1.0,
+      "solverMs": 4.53,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 937,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "nonstop only",
+        "lodging rated 4.8+",
+        "every meal vegetarian friendly"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "enough seats left for every traveler"
+      ]
+    },
+    {
+      "id": 74,
+      "text": "Plan 1 night from Miami to Chicago on December 19 for 2 people, no flights before 7am",
+      "tight": true,
+      "status": "planned",
+      "ms": 62.8,
+      "coverage": 1.0,
+      "solverMs": 5.73,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1169,
+      "greedy": "valid",
+      "greedyViolations": [],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 75,
+      "text": "Plan 1 night from Boston to New York on November 13 for 2 people, no flights before 9am",
+      "tight": false,
+      "status": "planned",
+      "ms": 62.6,
+      "coverage": 1.0,
+      "solverMs": 6.7,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 529,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "outbound departs at or after 9:00 am"
+      ],
+      "filterGreedy": "valid",
+      "filterGreedyViolations": []
+    },
+    {
+      "id": 76,
+      "text": "Plan 1 night from Chicago to Miami on December 16 for 4 people, nonstop, no flights before 8am",
+      "tight": true,
+      "status": "planned",
+      "ms": 49.2,
+      "coverage": 1.0,
+      "solverMs": 3.32,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 2056,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "outbound departs at or after 8:00 am",
+        "nonstop only"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "enough seats left for every traveler"
+      ]
+    },
+    {
+      "id": 77,
+      "text": "Plan 4 nights from Miami to Chicago on December 3 for 3 people, wheelchair accessible hotel, under $1,395, rated 4.2+",
+      "tight": true,
+      "status": "infeasible",
+      "ms": 197.8,
+      "coverage": 1.0,
+      "solverMs": 5.48,
+      "z3": "unsat (cost floor $2,227 > $1,395)",
+      "qedValid": null,
+      "mus": 1,
+      "fixits": 1,
+      "fixitsVerified": true,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "total cost at most $1,395",
+        "step-free, wheelchair-accessible lodging"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "total cost at most $1,395"
+      ]
+    },
+    {
+      "id": 78,
+      "text": "Plan 5 nights from San Diego to Los Angeles on November 15 for 2 people, a park",
+      "tight": false,
+      "status": "planned",
+      "ms": 127.7,
+      "coverage": 1.0,
+      "solverMs": 31.74,
+      "z3": "sat",
+      "qedValid": true,
+      "total": 1510,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "every meal slot filled by an open restaurant that serves it"
+      ],
+      "filterGreedy": "invalid",
+      "filterGreedyViolations": [
+        "every meal slot filled by an open restaurant that serves it"
+      ]
+    },
+    {
+      "id": 79,
+      "text": "Plan 1 night from Miami to Chicago on November 15 for 3 people, no red-eye, at least one Mexican dinner, rated 4.8+, wheelchair accessible hotel",
+      "tight": false,
+      "status": "infeasible",
+      "ms": 78.0,
+      "coverage": 1.0,
+      "solverMs": 0.73,
+      "z3": "unsat",
+      "qedValid": null,
+      "mus": 2,
+      "fixits": 2,
+      "fixitsVerified": true,
+      "greedy": "invalid",
+      "greedyViolations": [
+        "enough seats left for every traveler",
+        "no overnight (red-eye) departures",
+        "step-free, wheelchair-accessible lodging",
+        "lodging rated 4.8+"
+      ],
+      "filterGreedy": "no_plan"
+    }
+  ]
+}
