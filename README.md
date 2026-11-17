@@ -49,27 +49,6 @@ flowchart LR
 | Independent cross-check agrees (Z3 or cost floor) | 100% | | |
 | Latency p50 / p95 | 89 / 158 ms | | |
 
-## Try it
-
-```bash
-uv venv && uv pip install -e ".[dev]"
-plexis dev                                    # the add-on plus its partner services
-npm --prefix simulator install && npm --prefix simulator run dev
-```
-
-Open http://localhost:5173: a simulated Alexa+ host that is a real MCP client. Its console shows the protocol trace, latency, the proof, and a chaos lab.
-
-**Voice only, no screen:**
-
-```bash
-uv pip install -e ".[voice]"
-plexis voice                  # hands-free: pause naturally, interrupt any time
-plexis voice --headphones     # stops the instant you start talking
-plexis voice --text           # type instead of talking
-```
-
-For a natural voice that runs on your PC, also install `.[kokoro]`; the model (about 340 MB) downloads on first use. Without it, Plexis uses Microsoft's online neural voices and falls back to the system voice.
-
 ## Built with
 
 Python · MCP Python SDK (protocol 2025-11-25, Streamable HTTP) · OR-Tools CP-SAT · Z3 · LangGraph · Pipecat (Silero VAD, Smart Turn v3, Whisper) · Ed25519 · SQLite · React + TypeScript (MCP TypeScript SDK) · Docker · Amazon Bedrock (Nova via Strands, Guardrails) · Amazon S3 · AgentCore
@@ -90,11 +69,16 @@ Python · MCP Python SDK (protocol 2025-11-25, Streamable HTTP) · OR-Tools CP-S
 
 </details>
 
-## Honest limits
 
-- Flights, hotels, restaurants and payments are **simulated** partners with seeded, fictional US data. The architecture is built to plug in real APIs, but none are connected.
-- Real Alexa+ add-on access is partner-only, so the simulator stands in for Alexa+.
-- Bedrock and AgentCore are coded and degrade cleanly without credentials, but they have not been run live.
+## Validation & Integration Scope
+
+Plexis is a functional prototype with independently tested planning, constraint verification, and cryptographically signed receipts.
+
+- **Travel services:** Eight partner MCP servers simulate travel and payment workflows using reproducible datasets. The architecture supports integration with live provider APIs.
+- **Alexa+ compatibility:** Built around MCP and Alexa+ add-on conventions, with functionality demonstrated through an MCP-compatible simulator. Native Alexa+ deployment requires partner access.
+- **AWS services:** Amazon Bedrock and AgentCore integration paths are implemented with graceful fallbacks. Live cloud validation remains outside the current evaluation scope.
+
+The published benchmarks measure the core planning and verification system under controlled conditions, independently of external service availability.
 
 ## Repository layout
 
