@@ -38,6 +38,7 @@ from qed.guard import screen_input
 from qed.ir import ActivitiesPerDay, TripIntent
 from qed.partners.client import CallLog
 from qed.solver.cpsat import TripModel
+from qed.users import CURRENT_USER, DEMO_USER
 from qed.util import fmt_money
 
 REGIONS: dict[str, list[str]] = {
@@ -88,6 +89,11 @@ YES = re.compile(
 NO = re.compile(r"^\s*(?:no|nope|nah|not quite|wrong)\b", re.IGNORECASE)
 # Ordinals only: a bare "3" answers "how many nights?", it doesn't pick the third suggestion.
 ORDINALS = {"first": 0, "1st": 0, "second": 1, "2nd": 1, "third": 2, "3rd": 2, "last": -1}
+DECLINE = re.compile(
+    r"^\s*(?:no|nope|nah|not (?:now|yet|today)|no,? thanks?(?: you)?|maybe later|hold off|"
+    r"i'?ll think about it|let me think about it|don'?t book(?: it)?(?: yet)?)\s*[.!]?\s*$",
+    re.IGNORECASE,
+)
 FILLER = re.compile(
     r"^\s*(?:thanks?(?: you)?(?: (?:so|very) much)?|um+|uh+|hmm+|mm+|so|well|let me think|"
     r"one (?:sec|second|moment))\s*[.!,]?\s*$",
@@ -143,6 +149,7 @@ class Draft:
     asked: set[str] = field(default_factory=set)
     origin_from_profile: bool = False
     use_profile: bool = True
+    owner: str = field(default_factory=lambda: CURRENT_USER.get())
     stage: str = "collecting"  # collecting | planned | infeasible
     plan_id: str | None = None
     question: Question | None = None
@@ -158,6 +165,7 @@ class Draft:
             "asked": sorted(self.asked),
             "origin_from_profile": self.origin_from_profile,
             "use_profile": self.use_profile,
+            "owner": self.owner,
             "stage": self.stage,
             "plan_id": self.plan_id,
             "question": self.question.model_dump() if self.question else None,
@@ -174,6 +182,7 @@ class Draft:
             asked=set(d["asked"]),
             origin_from_profile=d["origin_from_profile"],
             use_profile=d.get("use_profile", True),
+            owner=d.get("owner", DEMO_USER),
             stage=d["stage"],
             plan_id=d["plan_id"],
             question=Question.model_validate(d["question"]) if d["question"] else None,
@@ -254,15 +263,14 @@ class Dialog:
     def _get(self, draft_id: str | None) -> Draft | None:
         if not draft_id or not re.fullmatch(r"[a-f0-9]{12}", draft_id):
             return None
-        if draft_id in self.drafts:
-            return self.drafts[draft_id]
+        draft = self.drafts.get(draft_id)
         path = self.dir / f"{draft_id}.json"
-        if path.exists():
+        if draft is None and path.exists():
             import orjson
 
-            self.drafts[draft_id] = Draft.load(orjson.loads(path.read_bytes()))
-            return self.drafts[draft_id]
-        return None
+            draft = self.drafts[draft_id] = Draft.load(orjson.loads(path.read_bytes()))
+        # A conversation belongs to whoever started it.
+        return draft if draft is not None and draft.owner == CURRENT_USER.get() else None
 
     def _save(self, d: Draft) -> None:
         import orjson
@@ -727,7 +735,7 @@ class Dialog:
 
     async def _restore(self, d: Draft, progress: Any) -> None:
         """After a restart the plan is gone from memory: rebuild it from the saved conversation."""
-        if d.plan_id and d.plan_id not in self.e.plans:
+        if d.plan_id and d.plan_id not in self.e.plans and self.e._restore_plan(d.plan_id) is None:
             res = await self.e.compile(
                 d.intent.utterance,
                 intent=d.intent.model_copy(deep=True),
@@ -758,6 +766,18 @@ class Dialog:
         return await self._refine(d, text, progress)
 
     async def _refine(self, d: Draft, text: str, progress: Any) -> Turn:
+        if DECLINE.match(text):  # "no" to "want me to book it?" is not a change to the trip
+            return Turn(
+                "planned",
+                d.id,
+                "Okay, I won't book it. You can change anything, like make it cheaper, "
+                "ask why I picked something, or ask what to pack.",
+                suggestions=[
+                    Suggestion(label="Make it cheaper", say="make it cheaper"),
+                    Suggestion(label="What should I pack?", say="what should I pack"),
+                    Suggestion(label="Book it", say="book it"),
+                ],
+            )
         await self._restore(d, progress)
         said = self._resolve(text, d.question) or text
         self.e.learner.note_refinement(said)
@@ -836,7 +856,9 @@ class Dialog:
         return ""
 
     def _unknown_places(self, text: str) -> list[str]:
-        out = []
+        from qed.compiler.rules import LOOKALIKES
+
+        out = [m.group(0).title() for m in LOOKALIKES.finditer(text.lower())]
         for m in PLACE_WORDS.finditer(text):
             place = m.group(1).strip()
             low = place.lower()

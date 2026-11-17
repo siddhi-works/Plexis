@@ -27,7 +27,16 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-voice = ["sounddevice>=0.5", "faster-whisper>=1.0", "pyttsx3>=2.90", "numpy>=1.26"]
+voice = [
+  "sounddevice>=0.5",
+  "faster-whisper>=1.0",
+  "pyttsx3>=2.90",
+  "numpy>=1.26",
+  "pipecat-ai[silero,local,whisper]>=1.13,<2",  # hands-free turn-taking (qed voice)
+  "edge-tts>=7.0",
+  "imageio-ffmpeg>=0.5",
+]
+kokoro = ["pipecat-ai[kokoro]>=1.13,<2"]  # natural voice on this PC; model files download on first use
 dev = [
   "pytest>=8.3",
   "pytest-asyncio>=0.24",

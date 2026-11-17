@@ -102,3 +102,28 @@ def test_negated_hostel_means_private() -> None:
 
 def test_adults_and_kids_are_all_counted() -> None:
     assert parse(f"to Denver from Austin on {WHEN} for 3 nights, we're 2 adults and 2 kids").travelers == 4
+
+
+@pytest.mark.parametrize(
+    ("text", "nights", "budget"),
+    [
+        ("fly to Boston from Seattle on 11/20 for 2 nights, budget is two thousand dollars", 2, 2000),
+        ("Boston from New York 11/20 - 11/23, under fifteen hundred", 3, 1500),
+        ("Denver from Austin on 12/4/2027 for 3 nights, under three grand", 3, 3000),
+    ],
+)
+def test_numeric_dates_and_budgets_in_words(text: str, nights: int, budget: int) -> None:
+    it = parse(text)
+    assert it.start_date is not None and it.nights == nights
+    assert next(c for c in it.constraints if c.kind == "budget_max").amount == budget
+
+
+def test_no_breakfast_is_an_unwanted_amenity() -> None:
+    it = parse(f"3 nights in Miami from Seattle on {WHEN}, no breakfast")
+    assert any(
+        c.kind == "stay_amenity" and c.amenity == "breakfast_included" and not c.want for c in it.constraints
+    )
+
+
+def test_portland_maine_is_not_portland_oregon() -> None:
+    assert parse(f"3 nights in Portland, Maine from Boston on {WHEN}").destination is None

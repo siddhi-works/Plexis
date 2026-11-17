@@ -85,8 +85,19 @@ def main(argv: list[str] | None = None) -> int:
     vc.add_argument("--mute", action="store_true", help="print replies instead of speaking them")
     vc.add_argument("--model", default="base.en", help="local Whisper model (tiny.en, base.en, small.en)")
     vc.add_argument(
-        "--always-on", action="store_true", help="listen continuously instead of press-to-talk (quiet rooms)"
+        "--push-to-talk", action="store_true", help="press Enter before each request (simple mode)"
     )
+    vc.add_argument("--headphones", action="store_true", help="stop talking the instant you start (no echo)")
+    vc.add_argument(
+        "--voice-engine",
+        choices=["kokoro", "edge"],
+        default="kokoro",
+        help="kokoro: on this PC; edge: online",
+    )
+    vc.add_argument(
+        "--voice", default=None, help="voice name, e.g. af_heart (Kokoro) or en-US-AriaNeural (edge)"
+    )
+    vc.add_argument("--no-wake-word", action="store_true", help="never require 'Plexis' after a quiet spell")
     ld = sub.add_parser("load")
     ld.add_argument("--n", type=int, default=40)
     ld.add_argument("--c", type=int, default=8)
@@ -140,16 +151,24 @@ def main(argv: list[str] | None = None) -> int:
         asyncio.run(run(args.n, Path(args.out)))
     elif args.cmd == "voice":
         from qed.config import load
-        from qed.device.device import main as voice_main
 
         s = load()
-        voice_main(
-            args.server or f"http://{s.host}:{s.port}",
-            text=args.text,
-            mute=args.mute,
-            model=args.model,
-            always_on=args.always_on,
-        )
+        base = args.server or f"http://{s.host}:{s.port}"
+        if args.text or args.mute or args.push_to_talk:
+            from qed.device.device import main as voice_main
+
+            voice_main(base, text=args.text, mute=args.mute, model=args.model)
+        else:
+            from qed.device.live import main as live_main
+
+            live_main(
+                base,
+                model=args.model,
+                headphones=args.headphones,
+                voice=args.voice,
+                engine=args.voice_engine,
+                wake_word=not args.no_wake_word,
+            )
     elif args.cmd == "load":
         from qed.eval.load import run as load_run
 

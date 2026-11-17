@@ -169,3 +169,16 @@ async def test_a_conversation_survives_a_server_restart(settings) -> None:  # ty
     restarted = Dialog(Engine(settings, LocalPartners()))  # same disk state, empty memory
     t2 = await restarted.turn("make it cheaper", t.draft_id)
     assert t2.status in ("planned", "infeasible")
+
+
+async def test_portland_maine_is_explained_not_misbooked(engine: Engine) -> None:
+    (t,) = await talk(Dialog(engine), f"Plan 3 nights in Portland, Maine from Boston on {WHEN}")
+    assert "Portland, Maine" in t.speech and t.question.slot == "destination"
+
+
+async def test_saying_no_to_booking_keeps_the_plan_and_says_what_next(engine: Engine) -> None:
+    trip = f"Plan 2 nights from Seattle to Portland on {WHEN} for 2 under $3,000, private room"
+    planned, declined, booked = await talk(Dialog(engine), trip, "no thanks", "book it")
+    assert planned.status == "planned" and planned.result is not None
+    assert declined.status == "planned" and "won't book" in declined.speech and declined.result is None
+    assert booked.draft_id == planned.draft_id

@@ -1,75 +1,101 @@
-# Plexis: Alexa+ trips you can trust
+# Plexis: the trip agent that has to prove its answers
 
-Plexis is an Alexa+ add-on: a self-hosted MCP server (protocol 2025-11-25, Streamable HTTP) that compiles a spoken trip request into a plan that comes with a proof. Every plan goes through four steps:
-- It is optimized by OR-Tools CP-SAT.
-- An independent verifier re-checks it.
-- Z3, or an arithmetic cost floor, cross-checks it.
-- It is signed with Ed25519 into a hash-chained ledger.
+**AI travel agents will confidently book a trip that breaks your own rules: over budget, a red-eye you ruled out, a hotel with stairs Grandma can't climb. Plexis isn't allowed to guess.**
 
-If a request is impossible, Plexis names the minimal set of clashing requirements and offers verified fix-its.
+You talk to it like a person. It plans with a constraint solver, re-checks every rule with an independent verifier and a second solver, and signs each plan with a tamper-evident receipt. If your wishes can't all be met, it tells you exactly which ones clash and the smallest change that fixes it.
 
-## Quick start
+Built for the Amazon Developer Hackathon (Alexa+ track) as an **Alexa+ add-on**: an MCP server that Alexa+ (or any MCP client) talks to.
 
-```bash
-uv venv && uv pip install -e ".[dev]"
-qed dev
+<p align="center"><img src="docs/plexis-demo.gif" width="640" alt="Plexis demo: a family trip request becomes a proven plan"></p>
+
+![Plexis proving a plan: 21 of 21 checks, each tied to the words that asked for it, plus a signed receipt ledger verified in the browser](docs/plexis-proof.png)
+
+*Above: "3 nights in San Diego for me, Grandma and Maya, under $3,000, step-free room with a pool." Every rule is checked and linked to the words (or the remembered household fact) behind it, and the receipts are re-verified in the browser.* [Full demo video (1:38)](Plexis_demo.mp4)
+
+## What it does
+
+- **Asks what you forgot.** Destination, dates, budget, and room needs people often skip (AC or not, breakfast, a pool, among 30 researched preferences), with suggested answers when you're vague.
+- **Plans with math, not guesswork.** Google OR-Tools CP-SAT finds the best plan that meets every rule.
+- **Proves it.** An independent checker re-verifies every rule, and Z3 (or an arithmetic cost floor) cross-checks the result.
+- **Signs it.** Each plan gets an Ed25519-signed, hash-chained receipt that anyone can verify.
+- **Explains impossibility.** It finds the minimal set of clashing requirements and offers fixes it has already verified.
+- **Keeps watching.** If a flight is cancelled, it has a checked replacement plan ready. It suggests better dates when the weather looks bad, and tells you what to pack.
+- **Remembers your household, privately.** "Grandma uses a wheelchair" is remembered with consent, per signed-in user, and labelled wherever it shapes a plan.
+- **Talks hands-free.** The voice device waits through natural pauses and lets you interrupt it mid-sentence.
+
+## How it works
+
+```mermaid
+flowchart LR
+    U(["You, by voice"]) --> A["Alexa+ / voice device"]
+    A -- "MCP over HTTP, OAuth" --> S["Plexis add-on"]
+    S --> D["Dialog agent<br/>(LangGraph)"]
+    D --> G["Parallel lookups<br/>transport, stays, dining,<br/>weather, places"]
+    G --> C["CP-SAT solver"]
+    C --> V["Independent verifier"]
+    C --> Z["Z3 cross-check"]
+    V & Z --> L["Signed receipt<br/>(Ed25519 ledger)"]
+    L --> A
 ```
 
-Then start the simulator:
+## Results
 
-```bash
-npm --prefix simulator install && npm --prefix simulator run dev
-```
-
-Open http://localhost:5173 to use the simulated Alexa+ host. It is a real MCP client (TypeScript SDK), and its console has four tabs: protocol trace, latency, proof and chaos lab.
-
-Voice-only device (no browser): `qed voice` (add `--text` to type). Install the extra with `uv pip install -e ".[voice]"`.
-
-## Results (`qed bench --n 80`, seeded, independent verifier as judge)
+`qed bench --n 80`: seeded requests, with the independent verifier as the judge.
 
 | | Plexis | Greedy | Filter-greedy |
 |---|---|---|---|
-| Plans passing every check | 100% | 13.8% | 25.0% |
-| Wrong plan returned for an impossible request | 0% | 100% | 60.0% |
+| Plans passing every check | **100%** | 13.8% | 25.0% |
+| Wrong plan returned for an impossible request | **0%** | 100% | 60.0% |
 | Independent cross-check agrees (Z3 or cost floor) | 100% | | |
 | Latency p50 / p95 | 89 / 158 ms | | |
 
-## What's inside
+## Try it
 
-- **Partner servers:** 7 partner MCP servers covering transport, stays, dining, experiences, weather, wallet and a simulated front desk.
-- **Alexa+ add-on conventions:**
-  - `structuredContent` with an `outputSchema`, plus `_meta.ui` pointing at an MCP App card for Echo Show.
-  - Elicitation asks for consent before payment and for the user's fix-it choice.
-  - Duplicate bookings are prevented.
-  - Two-tier OAuth: `client_credentials` for discovery, and `authorization_code` with PKCE for personal actions.
-  - An `addon.json` manifest in `alexa/addon-package/`.
-- **Household memory:** saved only with consent, and every fact that shapes a plan is labelled in it.
-- **Weather:** the plan is weather-aware and can suggest better dates.
+```bash
+uv venv && uv pip install -e ".[dev]"
+qed dev                                    # the add-on plus its partner services
+npm --prefix simulator install && npm --prefix simulator run dev
+```
+
+Open http://localhost:5173: a simulated Alexa+ host that is a real MCP client. Its console shows the protocol trace, latency, the proof, and a chaos lab.
+
+**Voice only, no screen:**
+
+```bash
+uv pip install -e ".[voice]"
+qed voice                  # hands-free: pause naturally, interrupt any time
+qed voice --headphones     # stops the instant you start talking
+qed voice --text           # type instead of talking
+```
+
+For a natural voice that runs on your PC, also install `.[kokoro]`; the model (about 340 MB) downloads on first use. Without it, Plexis uses Microsoft's online neural voices and falls back to the system voice.
+
+## Built with
+
+Python · MCP Python SDK (protocol 2025-11-25, Streamable HTTP) · OR-Tools CP-SAT · Z3 · LangGraph · Pipecat (Silero VAD, Smart Turn v3, Whisper) · Ed25519 · SQLite · React + TypeScript (MCP TypeScript SDK) · Docker · Amazon Bedrock (Nova via Strands, Guardrails) · Amazon S3 · AgentCore
+
+<details>
+<summary><b>Engineering details</b></summary>
+
+- **Alexa+ add-on conventions:** `structuredContent` with an `outputSchema`, `_meta.ui` pointing to an MCP App card for Echo Show, elicitation for payment consent and fix-it choices, duplicate-booking protection, two-tier OAuth (`client_credentials` for discovery, PKCE `authorization_code` for personal actions), and an `addon.json` manifest in `alexa/addon-package/`.
+- **Partners:** 8 partner MCP servers (transport, stays, dining, experiences, weather, wallet, guide, a simulated front desk), queried in parallel.
+- **Per-user privacy:** memory, learning, plans, trips and conversations belong to the signed-in user. Plan IDs are random and can't be derived from public receipts. Unlinked guests get no memory.
+- **Durability:** plans and booked trips are stored in SQLite and re-verified after a restart, so cancellation monitoring survives restarts.
 - **Booking:** a saga with rollback.
-- **Cancellations:** Plexis re-plans automatically and pushes an MCP notification.
-- **Travel brief:** what to pack and wear, with general (non-medical) comfort notes.
+- **Learning:** a phrasebook you can teach ("when I say beachy I mean near the beach"), correction logging and habits.
 - **Guardrails:** checks on input, on LLM provenance, on untrusted partner text and on spoken output.
-- **Resilience:** circuit breakers, retries, a stale cache and bulkheads.
-- **Observability and safety nets:** Prometheus metrics, OpenTelemetry tracing, and ledger backup and restore.
-- **AWS:**
-  - **Amazon Bedrock:** Nova models via the Strands Agents SDK, plus Bedrock Guardrails. They are optional and degrade cleanly without credentials.
-  - **Amazon S3:** ledger backups.
-  - **AgentCore Runtime:** deploy artifacts are in `deploy/agentcore/`. They have not been deployed.
-- **Agent Skill:** `skills/qed-domain-pack/`.
+- **Resilience and observability:** circuit breakers, retries, a stale cache, bulkheads, Prometheus metrics, OpenTelemetry tracing, and ledger backup and restore.
+- **Voice turn-taking:** Silero VAD, Whisper, and Smart Turn v3 end-of-turn detection; barge-in with an echo filter; a follow-up window and wake word after a quiet spell.
+- **Tests:** `pytest -q` runs 105 tests: unit, Hypothesis property and metamorphic checks, verifier mutation, live MCP contract, chaos scenarios, privacy, restart, and a latency SLO.
 
-## Tests
-
-`pytest -q`: 90 tests covering unit, Hypothesis property and metamorphic checks, verifier mutation, live MCP contract and chaos scenarios, plus a latency SLO.
+</details>
 
 ## Honest limits
 
-- All partners are simulated, with seeded and fictional data.
-- Real Alexa+ access is partner-only, so the simulator stands in for Alexa+.
-- Bedrock and AgentCore have not been exercised live.
+- Flights, hotels, restaurants and payments are **simulated** partners with seeded, fictional US data. The architecture is built to plug in real APIs, but none are connected.
+- Real Alexa+ add-on access is partner-only, so the simulator stands in for Alexa+.
+- Bedrock and AgentCore are coded and degrade cleanly without credentials, but they have not been run live.
 
 ## More
 
-- [SUBMISSION.md](SUBMISSION.md): the Devpost text
-- [DEMO_SCRIPT.md](DEMO_SCRIPT.md): the video script
-- [FRICTION_LOG.md](FRICTION_LOG.md) and [PRODUCT_FEEDBACK.md](PRODUCT_FEEDBACK.md)
-- [LICENSE](LICENSE): MIT
+[SUBMISSION.md](SUBMISSION.md) (Devpost text) · [FRICTION_LOG.md](FRICTION_LOG.md) · [PRODUCT_FEEDBACK.md](PRODUCT_FEEDBACK.md) · [DEMO_SCRIPT.md](DEMO_SCRIPT.md) · [MIT license](LICENSE)

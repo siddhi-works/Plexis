@@ -5,7 +5,8 @@ two-tier OAuth flow, speaks MCP 2025-11-25 over Streamable HTTP, routes each
 utterance to the right tool, answers the add-on's confirmation questions by
 voice (elicitation), and reads proactive alerts (a cancelled flight) aloud.
 
-    qed voice                 # microphone + spoken replies
+    qed voice                 # hands-free: natural pauses and interruptions (device/live.py)
+    qed voice --push-to-talk  # press Enter, then speak
     qed voice --text          # type instead of talking (testing)
 """
 
@@ -202,12 +203,12 @@ class Device:
                 ) and self.ctx.status not in ("needs_input", "infeasible"):
                     await self.say("You're welcome!")
                     continue
-                if STOP.match(heard):
+                if STOP.match(heard) or (len(heard.split()) <= 6 and re.search(r"\bbye\b", heard, re.I)):
                     await self.say("Okay. Have a great trip!")
                     return
                 tool, args = route(heard, self.ctx)
                 try:
-                    res = await s.call_tool(tool, args)
+                    res = await self.call(s, tool, args)
                 except Exception as exc:
                     await self.say(f"Something went wrong reaching the trip service: {exc}")
                     continue
@@ -218,6 +219,14 @@ class Device:
                 if sc.get("status") in ("needs_input", "infeasible") and opts:
                     speech += " You can say, " + ", or ".join(o.split(":")[0] for o in opts[:3]) + "."
                 await self.say(speech)
+
+    async def call(self, s: Any, tool: str, args: dict[str, Any]) -> Any:
+        """Call the add-on; if it takes a moment, say so instead of going silent."""
+        pending = asyncio.ensure_future(s.call_tool(tool, args))
+        done, _ = await asyncio.wait({pending}, timeout=1.5)
+        if not done and tool in ("plan_trip", "book_trip", "check_better_dates", "call_front_desk"):
+            await self.say("One moment." if tool != "plan_trip" else "Let me look into that.")
+        return await pending
 
     def _remember(self, sc: dict[str, Any]) -> None:
         c = self.ctx
@@ -232,9 +241,9 @@ class Device:
             c.alerts.clear()
 
 
-def main(base: str, *, text: bool, mute: bool, model: str, always_on: bool = False) -> None:
+def main(base: str, *, text: bool, mute: bool, model: str) -> None:
     from qed.device.audio import MicEars, PrintVoice, SystemVoice, TextEars
 
-    ears: Ears = TextEars() if text else MicEars(model=model, push_to_talk=not always_on)
+    ears: Ears = TextEars() if text else MicEars(model=model, push_to_talk=True)
     voice: Voice = PrintVoice() if mute else SystemVoice()
     asyncio.run(Device(base, ears, voice).run())

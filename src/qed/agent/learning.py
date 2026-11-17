@@ -41,8 +41,9 @@ CHEAPER = re.compile(
 
 
 class Learner:
-    def __init__(self, state_dir: Path) -> None:
-        self.path = state_dir / "learning.json"
+    def __init__(self, state_dir: Path | None) -> None:
+        """`state_dir=None` keeps everything in memory and saves nothing (guests)."""
+        self.path = state_dir / "learning.json" if state_dir is not None else None
         self._lock = threading.Lock()
         self.data: dict[str, Any] = {
             "lexicon": {},
@@ -50,10 +51,12 @@ class Learner:
             "gaps": {},
             "habits": {"cheaper": 0, "plans": 0},
         }
-        if self.path.exists():
+        if self.path is not None and self.path.exists():
             self.data.update(orjson.loads(self.path.read_bytes()))
 
     def _save(self) -> None:
+        if self.path is None:
+            return
         with self._lock:
             self.path.write_bytes(orjson.dumps(self.data, option=orjson.OPT_INDENT_2))
 

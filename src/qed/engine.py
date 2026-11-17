@@ -14,6 +14,7 @@ import asyncio
 import contextlib
 import difflib
 import re
+import secrets
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -26,9 +27,7 @@ import z3
 from ortools import __version__ as ORTOOLS_VERSION
 
 from qed import telemetry as tm
-from qed.agent.learning import Learner
 from qed.companion.brief import build_brief
-from qed.companion.profile import ProfileStore
 from qed.compiler import rules
 from qed.config import Settings
 from qed.domain import world
@@ -51,6 +50,8 @@ from qed.solver.cpsat import TripModel
 from qed.solver.diagnose import Conflict, conflict_diagnostic, explain_conflict, minimal_core, why_not
 from qed.solver.plan import Plan
 from qed.speech import conflict_speech, missing_speech, plan_speech
+from qed.store import Store
+from qed.users import CURRENT_USER, Users
 from qed.util import Stopwatch, canonical_json, digest, fmt_minutes, fmt_money, sha256_hex
 from qed.verify.checker import Verdict, verify
 
@@ -68,6 +69,7 @@ class StoredPlan:
     entry: Entry | None
     conflict: Conflict | None = None
     created: float = field(default_factory=time.time)
+    owner: str = field(default_factory=lambda: CURRENT_USER.get())
 
 
 @dataclass
@@ -80,6 +82,7 @@ class Trip:
     status: str = "booked"
     alerts: list[dict[str, Any]] = field(default_factory=list)
     history: list[dict[str, Any]] = field(default_factory=list)
+    owner: str = field(default_factory=lambda: CURRENT_USER.get())
 
 
 @dataclass
@@ -115,12 +118,29 @@ class Engine:
         self.ledger = Ledger(
             self.state, self.signer, backup_every=settings.backup_every, s3_bucket=settings.backup_s3_bucket
         )
-        self.profile = ProfileStore(self.state, seed_demo=seed_demo_household)
-        self.learner = Learner(self.state)
+        self.users = Users(self.state, seed_demo=seed_demo_household)
         self.bedrock = Bedrock(settings)
-        self.plans: dict[str, StoredPlan] = {}
-        self.trips: dict[str, Trip] = {}
+        self.store = Store(self.state)
+        self.plans: dict[str, StoredPlan] = {}  # cache; the store is the source of truth
+        self.trips: dict[str, Trip] = {Trip(**t).trip_id: Trip(**t) for t in self.store.load_trips()}
         self.alert_listeners: list[Any] = []
+
+    @property
+    def profile(self) -> Any:
+        """The signed-in user's household memory."""
+        return self.users.profile()
+
+    @property
+    def learner(self) -> Any:
+        """The signed-in user's phrasebook, corrections and habits."""
+        return self.users.learner()
+
+    def trips_for(self, user: str | None = None) -> list[Trip]:
+        user = user or CURRENT_USER.get()
+        return [t for t in self.trips.values() if t.owner == user]
+
+    def save_trip(self, trip: Trip) -> None:
+        self.store.save_trip(trip)
 
     # ------------------------------------------------------------------ compile
 
@@ -338,9 +358,13 @@ class Engine:
                     self.ledger.append, "plan" if status == "planned" else "infeasibility", cert
                 )
                 self._save_snapshot(catalog)
-            plan_id = sha256_hex(canonical_json(cert))[:12]
+            # Random as well as content-derived: two customers asking for the same trip in the
+            # same second get different plans, and nobody can guess someone else's plan id.
+            plan_id = sha256_hex(canonical_json(cert) + secrets.token_bytes(16))[:12]
             stored = StoredPlan(plan_id, intent, catalog, res.plan, verdict, cert, entry, conflict)
             self.plans[plan_id] = stored
+            if sign:
+                await asyncio.to_thread(self.store.save_plan, stored)
 
         with sw.stage("speech"):
             if status == "planned" and res.plan is not None and verdict is not None:
@@ -703,9 +727,33 @@ class Engine:
             path.write_bytes(orjson.dumps(catalog.snapshot()))
 
     def get(self, plan_id: str) -> StoredPlan:
-        sp = self.plans.get(plan_id)
-        if sp is None:
+        sp = self.plans.get(plan_id) or self._restore_plan(plan_id)
+        if sp is None or sp.owner not in (CURRENT_USER.get(), "system"):
             raise KeyError(f"unknown plan {plan_id}; plan a trip first")
+        return sp
+
+    def _restore_plan(self, plan_id: str) -> StoredPlan | None:
+        """Rebuild a plan saved before a restart, re-verifying it against its own partner data."""
+        body = self.store.load_plan(plan_id)
+        if body is None:
+            return None
+        plan, intent, catalog = body["plan"], body["intent"], body["catalog"]
+        verdict = verify(intent, catalog, plan) if plan is not None else None
+        conflict = Conflict(**body["conflict"]) if body["conflict"] else None
+        entry = self.ledger.get(body["entry_index"]) if body["entry_index"] is not None else None
+        sp = StoredPlan(
+            plan_id,
+            intent,
+            catalog,
+            plan,
+            verdict,
+            body["certificate"],
+            entry,
+            conflict,
+            created=body["created"],
+            owner=body["owner"],
+        )
+        self.plans[plan_id] = sp
         return sp
 
     # ------------------------------------------------------------------ refine & fix
@@ -856,7 +904,11 @@ class Engine:
             return {"status": "rejected", "message": "Only a verified, signed plan can be booked."}
         idem = f"book:{sp.entry.cert_hash}"
         existing = next(
-            (t for t in self.trips.values() if t.plan_id == plan_id and t.status in ("booked", "amended")),
+            (
+                t
+                for t in self.trips_for(sp.owner)
+                if t.plan_id == plan_id and t.status in ("booked", "amended")
+            ),
             None,
         )
         if existing:
@@ -1038,6 +1090,7 @@ class Engine:
             auth_id=auth_id,
         )
         self.trips[trip.trip_id] = trip
+        self.save_trip(trip)
         self.profile.learn_from_booking(
             [a.attraction.category for a in plan.activities],
             [c for m in plan.meals for c in m.restaurant.cuisines],
@@ -1126,7 +1179,7 @@ class Engine:
         for trip in list(self.trips.values()):
             if trip.status not in ("booked", "amended"):
                 continue
-            sp = self.plans.get(trip.plan_id)
+            sp = self.plans.get(trip.plan_id) or self._restore_plan(trip.plan_id)
             if sp is None or sp.plan is None:
                 continue
             legs = {sp.plan.outbound.id: "outbound", sp.plan.inbound.id: "return"}
@@ -1134,18 +1187,25 @@ class Engine:
                 statuses = await self.partners.statuses(list(legs))
             except Exception:  # noqa: S112
                 continue
-            for st in statuses:
-                if st.status != "cancelled" or any(a["optionId"] == st.option_id for a in trip.alerts):
-                    continue
-                tm.DISRUPTIONS.labels("cancellation").inc()
-                alert = await self._replan_after_cancellation(trip, sp, st.option_id, legs[st.option_id])
-                trip.alerts.append(alert)
-                new_alerts.append(alert)
-                for listener in self.alert_listeners:
-                    try:
-                        await listener(trip, alert)
-                    except Exception:  # noqa: S110
-                        pass
+            owner_token = CURRENT_USER.set(trip.owner)  # the re-plan belongs to the trip's owner
+            try:
+                for st in statuses:
+                    if st.status != "cancelled" or any(a["optionId"] == st.option_id for a in trip.alerts):
+                        continue
+                    tm.DISRUPTIONS.labels("cancellation").inc()
+                    alert = await self._replan_after_cancellation(trip, sp, st.option_id, legs[st.option_id])
+                    trip.alerts.append(alert)
+                    self.save_trip(trip)
+                    new_alerts.append(alert)
+                    for listener in self.alert_listeners:
+                        try:
+                            await listener(trip, alert)
+                        except Exception:  # noqa: S110
+                            pass
+            except Exception:  # noqa: S112 - one trip's failed re-plan must not stop the others' alerts
+                continue
+            finally:
+                CURRENT_USER.reset(owner_token)
         return new_alerts
 
     async def _replan_after_cancellation(

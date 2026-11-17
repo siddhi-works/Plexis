@@ -39,3 +39,6 @@ Thumbs.db
 
 # Benchmark scratch state (contains generated keys)
 eval/**/state/
+
+# Local submission deliverables
+Plexis_Devpost_Submission.pdf

@@ -336,25 +336,30 @@ TIME_RE = r"(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?"
 # ---------------------------------------------------------------------- rules
 
 
+# Same name, different place: "Portland, Maine" must never become Portland, Oregon.
+LOOKALIKES = re.compile(r"\bportland,?\s+(?:maine|me)\b")
+
+
 def rule_cities(text: str, st: ParseState) -> None:
     names = sorted(CITY_ALIASES, key=len, reverse=True)
     alt = "|".join(re.escape(n) for n in names)
-    for m in re.finditer(rf"\bfrom\s+({alt})\b", st.low):
+    low = LOOKALIKES.sub(lambda m: "#" * len(m.group(0)), st.low)  # same length, so spans still line up
+    for m in re.finditer(rf"\bfrom\s+({alt})\b", low):
         st.intent.origin = CITY_ALIASES[m.group(1)]
         st.intent.provenance["origin"] = st.take(m)
-    for m in re.finditer(rf"\b(?:to|in|visit(?:ing)?|around|for)\s+({alt})\b", st.low):
+    for m in re.finditer(rf"\b(?:to|in|visit(?:ing)?|around|for)\s+({alt})\b", low):
         if not st.free(m) or CITY_ALIASES[m.group(1)] == st.intent.origin:
             continue
         st.intent.destination = CITY_ALIASES[m.group(1)]
         st.intent.provenance["destination"] = st.take(m)
         break
-    m = re.search(rf"\b({alt})\s+(?:to|->|→)\s+({alt})\b", st.low)
+    m = re.search(rf"\b({alt})\s+(?:to|->|→)\s+({alt})\b", low)
     if m and st.free(m):
         st.intent.origin, st.intent.destination = CITY_ALIASES[m.group(1)], CITY_ALIASES[m.group(2)]
         span = st.take(m)
         st.intent.provenance["origin"] = st.intent.provenance["destination"] = span
     if not st.intent.destination:
-        for m in re.finditer(rf"\b({alt})\b", st.low):
+        for m in re.finditer(rf"\b({alt})\b", low):
             code = CITY_ALIASES[m.group(1)]
             if st.free(m) and code != st.intent.origin:
                 st.intent.destination = code
@@ -370,9 +375,35 @@ def _resolve_day(day: int, month: int, ref: date) -> date:
     return candidate
 
 
+def _numeric_date(month: str, day: str, year: str | None, ref: date) -> date | None:
+    mo, d = int(month), int(day)
+    if not (1 <= mo <= 12 and 1 <= d <= 31):
+        return None
+    try:
+        if year:
+            y = int(year) + (2000 if len(year) == 2 else 0)
+            return date(y, mo, d)
+        return _resolve_day(d, mo, ref)
+    except ValueError:
+        return None
+
+
 def rule_dates(text: str, st: ParseState) -> None:
     ref = today()
     low = st.low
+    md = r"(\d{1,2})/(\d{1,2})(?:/(\d{2}|\d{4}))?"
+    m = re.search(rf"\b{md}\s*(?:-|–|to|through|until|till)\s*{md}\b", low)
+    if m:
+        start = _numeric_date(m.group(1), m.group(2), m.group(3), ref)
+        end = _numeric_date(m.group(4), m.group(5), m.group(6) or m.group(3), ref)
+        if start and end and end > start:
+            st.intent.start_date, st.intent.nights = start, (end - start).days
+            st.intent.provenance["start_date"] = st.intent.provenance["nights"] = st.take(m)
+            return
+    m = re.search(rf"\b(?:on\s+|starting\s+|leaving\s+)?{md}\b", low)
+    if m and (d0 := _numeric_date(m.group(1), m.group(2), m.group(3), ref)):
+        st.intent.start_date = d0
+        st.intent.provenance["start_date"] = st.take(m)
     # Ranges: "nov 14 to nov 17", "nov 14-17", "from november 14 through 17"
     m = re.search(
         rf"\b{MONTH_RE}\.?\s+(\d{{1,2}})(?:st|nd|rd|th)?\s*(?:-|–|to|through|until|till)\s*(?:{MONTH_RE}\.?\s+)?(\d{{1,2}})(?:st|nd|rd|th)?\b",
@@ -514,6 +545,77 @@ def rule_budget(text: str, st: ParseState) -> None:
     m = re.search(r"\$\s*(\d{1,3}(?:,\d{3})+|\d+)\s*(k)?\s*(?:budget|total|all in|max)\b", st.low)
     if m and st.free(m):
         st.add(BudgetMax(amount=_money(m.group(1), m.group(2))), m)
+        return
+    word = (
+        r"(?:a|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|"
+        r"seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|grand|and)"
+    )
+    m = re.search(
+        rf"\b(?:under|below|less than|at most|budget(?: of| is| around)?|up to|no more than|within|around)\s+"
+        rf"((?:{word}[\s-]+)*{word})\b(?:\s*(?:dollars|bucks|usd))?",
+        st.low,
+    )
+    if m and st.free(m) and re.search(r"hundred|thousand|grand", m.group(1)):
+        amount = words_to_number(m.group(1))
+        if amount and amount >= 50:
+            st.add(BudgetMax(amount=amount), m)
+
+
+_UNITS = {
+    w: i
+    for i, w in enumerate(
+        [
+            "zero",
+            "one",
+            "two",
+            "three",
+            "four",
+            "five",
+            "six",
+            "seven",
+            "eight",
+            "nine",
+            "ten",
+            "eleven",
+            "twelve",
+            "thirteen",
+            "fourteen",
+            "fifteen",
+            "sixteen",
+            "seventeen",
+            "eighteen",
+            "nineteen",
+        ]
+    )
+}
+_TENS = {
+    w: 10 * i
+    for i, w in enumerate(
+        ["_", "_", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]
+    )
+    if w != "_"
+}
+
+
+def words_to_number(text: str) -> int | None:
+    """'two thousand five hundred' -> 2500, 'fifteen hundred' -> 1500, 'three grand' -> 3000."""
+    total, current, seen = 0, 0, False
+    for w in re.split(r"[\s-]+", text.lower().strip()):
+        if w in ("and", ""):
+            continue
+        if w == "a":
+            current, seen = 1, True
+        elif w in _UNITS:
+            current, seen = current + _UNITS[w], True
+        elif w in _TENS:
+            current, seen = current + _TENS[w], True
+        elif w == "hundred":
+            current, seen = max(current, 1) * 100, True
+        elif w in ("thousand", "grand"):
+            total, current, seen = total + max(current, 1) * 1000, 0, True
+        else:
+            return None
+    return total + current if seen else None
 
 
 def _money(num: str, mult: str | None) -> int:
@@ -767,6 +869,9 @@ def rule_objective(text: str, st: ParseState) -> None:
 
 
 def rule_amenities(text: str, st: ParseState) -> None:
+    m = re.search(rf"\b{NEGATE}\s+(?:the\s+|any\s+)?breakfast\b", st.low)
+    if m and st.free(m):
+        st.add(StayAmenity(amenity="breakfast_included", want=False), m)  # type: ignore[arg-type]
     for amenity, syn in SYNONYMS.items():
         m = re.search(rf"\b{NEGATE}\s+(?:an?\s+|the\s+|any\s+)?(?:{syn})(?=\W|$)", st.low)
         if m and st.free(m):

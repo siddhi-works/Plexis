@@ -46,6 +46,7 @@ from qed.engine import CompileResult, Engine
 from qed.partners.client import McpPartners
 from qed.server.auth import Authority
 from qed.server.present import plan_data, voice_options
+from qed.users import CURRENT_USER, DEMO_USER, GUEST, start_request
 from qed.util import fmt_money
 
 CARD_URI = "ui://qed/trip-card.html"
@@ -185,6 +186,14 @@ def build_server(engine: Engine, settings: Settings, authority: Authority | None
         tok = get_access_token()
         return tok is not None and "mcp:tools" in tok.scopes
 
+    def bind_user() -> None:
+        """Every tool call acts for the signed-in customer; unlinked calls are guests with no memory."""
+        if authority is None:
+            start_request(DEMO_USER)
+            return
+        tok = get_access_token()
+        start_request(tok.subject if tok is not None and "mcp:tools" in tok.scopes and tok.subject else GUEST)
+
     def link_account(action: str) -> CallToolResult:
         return result(
             QedOutput(
@@ -229,6 +238,7 @@ def build_server(engine: Engine, settings: Settings, authority: Authority | None
             Field(description="draftId from the previous plan_trip response, to continue that conversation."),
         ] = None,
     ) -> Out:
+        bind_user()
         turn = await dialog.turn(request, draft_id, use_profile=personal(), progress=progress_of(ctx))
         return from_turn(turn, engine)
 
@@ -245,6 +255,7 @@ def build_server(engine: Engine, settings: Settings, authority: Authority | None
         change: Annotated[str, Field(description="What to change, in the customer's words.")] = "",
         fix_id: Annotated[str | None, Field(description="Id of a suggested fix to apply.")] = None,
     ) -> Out:
+        bind_user()
         try:
             if fix_id:
                 res = await engine.apply_fix(plan_id, fix_id, progress=progress_of(ctx))
@@ -265,6 +276,7 @@ def build_server(engine: Engine, settings: Settings, authority: Authority | None
         "(e.g. 'why not the Harbor Inn?', 'why this flight?').",
     )
     async def explain_choice(plan_id: str, question: str) -> Out:
+        bind_user()
         try:
             ans = await engine.why(plan_id, question)
         except KeyError as exc:
@@ -279,6 +291,7 @@ def build_server(engine: Engine, settings: Settings, authority: Authority | None
         description="Check whether nearby dates have better weather and re-plan them to compare prices.",
     )
     async def check_better_dates(plan_id: str) -> Out:
+        bind_user()
         try:
             ans = await engine.better_dates(plan_id)
         except KeyError as exc:
@@ -308,6 +321,7 @@ def build_server(engine: Engine, settings: Settings, authority: Authority | None
             str | None, Field(description="Token from a previous confirmation_required response.")
         ] = None,
     ) -> Out:
+        bind_user()
         if not personal():
             return link_account("book trips")
         try:
@@ -318,7 +332,7 @@ def build_server(engine: Engine, settings: Settings, authority: Authority | None
             return result(
                 QedOutput(status="rejected", speech="That request had no valid plan to book."), error=True
             )
-        if any(t.plan_id == plan_id and t.status in ("booked", "amended") for t in engine.trips.values()):
+        if any(t.plan_id == plan_id and t.status in ("booked", "amended") for t in engine.trips_for()):
             booking = await engine.book(
                 plan_id
             )  # idempotent: returns the existing receipt, never charges twice
@@ -378,6 +392,7 @@ def build_server(engine: Engine, settings: Settings, authority: Authority | None
         description="What to wear each day, what to pack, food highlights and comfort notes for a planned trip.",
     )
     async def travel_brief(plan_id: str) -> Out:
+        bind_user()
         try:
             brief = await engine.brief(plan_id)
         except KeyError as exc:
@@ -396,6 +411,7 @@ def build_server(engine: Engine, settings: Settings, authority: Authority | None
         "The caller always discloses it is an AI. Simulated in this build.",
     )
     async def call_front_desk(plan_id: str, questions: list[str], ctx: Context) -> Out:
+        bind_user()
         if not personal():
             return link_account("call on your behalf")
         try:
@@ -436,6 +452,7 @@ def build_server(engine: Engine, settings: Settings, authority: Authority | None
         ctx: Context,
         statement: str | None = None,
     ) -> Out:
+        bind_user()
         if not personal():
             return link_account("use household memory")
         store = engine.profile
@@ -515,7 +532,8 @@ def build_server(engine: Engine, settings: Settings, authority: Authority | None
         "books the verified replacement Plexis prepared.",
     )
     async def trip_status(ctx: Context, trip_id: str | None = None, accept_rebooking: bool = False) -> Out:
-        trips = [t for t in engine.trips.values() if trip_id in (None, t.trip_id)]
+        bind_user()
+        trips = [t for t in engine.trips_for() if trip_id in (None, t.trip_id)]
         if not trips:
             return result(QedOutput(status="no_trips", speech="You have no booked trips yet."), card=False)
         trip = trips[-1]
@@ -530,6 +548,7 @@ def build_server(engine: Engine, settings: Settings, authority: Authority | None
                 alert["resolved"] = True
                 trip.status = "amended"
                 trip.history.append({"rebookedTo": booking["tripId"], "receipt": booking["receipt"]})
+                engine.save_trip(trip)
                 SESSIONS[booking["tripId"]] = ctx.session
             return result(
                 QedOutput(
@@ -560,6 +579,7 @@ def build_server(engine: Engine, settings: Settings, authority: Authority | None
         "and an offline re-check of every rule against the frozen partner data.",
     )
     async def verify_receipt(receipt_index: int) -> Out:
+        bind_user()
         v = engine.verify_receipt(receipt_index)
         speech = (
             f"Receipt {receipt_index} is authentic: signature valid, chain intact"
@@ -596,7 +616,10 @@ def build_server(engine: Engine, settings: Settings, authority: Authority | None
         description="Booked trip with live disruption alerts. Subscribe for updates.",
     )
     def trip_resource(trip_id: str) -> dict[str, Any]:
+        bind_user()
         t = engine.trips.get(trip_id)
+        if t is not None and t.owner != CURRENT_USER.get():
+            t = None
         return (
             {"error": "not found"}
             if t is None

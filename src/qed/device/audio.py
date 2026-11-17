@@ -145,7 +145,7 @@ class SystemVoice:
         import threading
 
         self.rate = rate
-        self._jobs: queue.Queue[tuple[str, threading.Event]] = queue.Queue()
+        self._jobs: queue.Queue[tuple[str, threading.Event, str | None]] = queue.Queue()
         self._ready = threading.Event()
         threading.Thread(target=self._loop, name="qed-voice", daemon=True).start()
         self._ready.wait(10)
@@ -173,9 +173,12 @@ class SystemVoice:
             engine.setProperty("voice", female.id)
         self._ready.set()
         while True:
-            text, done = self._jobs.get()
+            text, done, wav = self._jobs.get()
             try:
-                engine.say(text)
+                if wav is None:
+                    engine.say(text)
+                else:
+                    engine.save_to_file(text, wav)
                 engine.runAndWait()
             finally:
                 done.set()
@@ -185,7 +188,15 @@ class SystemVoice:
 
         print(f"Plexis> {text}", flush=True)
         done = threading.Event()
-        self._jobs.put((text.replace("$", "").replace(" | ", ". "), done))
+        self._jobs.put((text.replace("$", "").replace(" | ", ". "), done, None))
+        done.wait(60)
+
+    def to_wav(self, text: str, path: str) -> None:
+        """Render speech to a WAV file instead of the speakers (blocking)."""
+        import threading
+
+        done = threading.Event()
+        self._jobs.put((text.replace("$", ""), done, path))
         done.wait(60)
 
 
