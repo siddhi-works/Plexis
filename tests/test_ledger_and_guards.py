@@ -5,9 +5,9 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-from qed.domain import world
-from qed.guard import check_llm_provenance, grounded, redact, scan_untrusted, screen_input
-from qed.receipts.ledger import Ledger, Signer, verify_signature
+from plexis.domain import world
+from plexis.guard import check_llm_provenance, grounded, redact, scan_untrusted, screen_input
+from plexis.receipts.ledger import Ledger, Signer, verify_signature
 
 
 def make_ledger(tmp_path: Path) -> Ledger:

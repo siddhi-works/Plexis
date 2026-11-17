@@ -6,7 +6,7 @@ import time
 
 import pytest
 
-from qed.engine import Engine
+from plexis.engine import Engine
 from tests.conftest import WHEN
 
 pytestmark = pytest.mark.asyncio
@@ -117,6 +117,7 @@ async def test_payment_details_never_reach_the_compiler(engine: Engine) -> None:
     assert res.status == "rejected" and "card" in res.speech
 
 
+@pytest.mark.timing
 async def test_fast_path_latency_slo(engine: Engine) -> None:
     await engine.compile(FAMILY, sign=False)  # warm caches
     times = []

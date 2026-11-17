@@ -14,7 +14,7 @@ from datetime import timedelta
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from qed.ir import (
+from plexis.ir import (
     AttractionsAccessible,
     BudgetMax,
     CategoryMin,
@@ -29,10 +29,10 @@ from qed.ir import (
     StayMinRating,
     StayRuleC,
 )
-from qed.solver import z3check
-from qed.solver.cpsat import TripModel
-from qed.solver.diagnose import minimal_core
-from qed.verify.checker import verify
+from plexis.solver import z3check
+from plexis.solver.cpsat import TripModel
+from plexis.solver.diagnose import minimal_core
+from plexis.verify.checker import verify
 from tests.conftest import TRIP_DAY
 from tests.helpers import catalog_for, make_intent
 

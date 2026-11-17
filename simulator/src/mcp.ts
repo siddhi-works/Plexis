@@ -13,7 +13,7 @@ import {
   type JSONRPCMessage,
 } from "@modelcontextprotocol/sdk/types.js";
 
-export const SERVER: string = (import.meta.env.VITE_QED_URL as string | undefined) ?? "http://127.0.0.1:8000";
+export const SERVER: string = (import.meta.env.VITE_PLEXIS_URL as string | undefined) ?? "http://127.0.0.1:8000";
 const CLIENT_ID = "alexa-plus-simulator";
 const CLIENT_SECRET = "dev-secret-change-me";
 
@@ -73,7 +73,7 @@ export async function getToken(linked: boolean): Promise<{ token: string; scope:
   return { token: j.access_token, scope: j.scope };
 }
 
-export class QedClient {
+export class PlexisClient {
   client: Client;
   transport!: StreamableHTTPClientTransport;
   protocolVersion = "";

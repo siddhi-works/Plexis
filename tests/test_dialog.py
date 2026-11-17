@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from qed.agent.dialog import Dialog
-from qed.engine import Engine
+from plexis.agent.dialog import Dialog
+from plexis.engine import Engine
 from tests.conftest import WHEN
 
 pytestmark = pytest.mark.asyncio
@@ -92,7 +92,7 @@ async def test_choosing_a_fix_by_voice(engine: Engine) -> None:
 
 
 async def test_remembered_room_preferences_apply_next_time(engine: Engine) -> None:
-    from qed.companion.profile import interpret
+    from plexis.companion.profile import interpret
 
     for cand in interpret("we prefer no AC and shared rooms"):
         engine.profile.remember(cand, "we prefer no AC and shared rooms")
@@ -160,7 +160,7 @@ async def test_repeated_cheaper_requests_become_the_default(engine: Engine) -> N
 
 
 async def test_a_conversation_survives_a_server_restart(settings) -> None:  # type: ignore[no-untyped-def]
-    from qed.partners.client import LocalPartners
+    from plexis.partners.client import LocalPartners
 
     first = Dialog(Engine(settings, LocalPartners()))
     (t,) = await talk(

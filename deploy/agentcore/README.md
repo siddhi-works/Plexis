@@ -5,7 +5,7 @@
 > during the hackathon). The steps below are the intended path.
 
 AgentCore Runtime hosts MCP servers that listen on `0.0.0.0:8000/mcp`, which is
-exactly what the `Dockerfile` produces (`qed serve`).
+exactly what the `Dockerfile` produces (`plexis serve`).
 
 ## Why stateful mode
 
@@ -19,23 +19,22 @@ configure the runtime in stateful MCP mode.
 
 1. Build and push the image to Amazon ECR:
    ```bash
-   docker build -t qed .
+   docker build -t plexis .
    ```
 2. Create the AgentCore Runtime with the MCP protocol, stateful sessions, and
    an inbound JWT authorizer. AgentCore Identity or Login with Amazon can
    issue the tokens; Plexis's verifier only needs the issuer, audience
    (`https://<runtime-url>/mcp`) and the scopes `mcp:service` / `mcp:tools`.
-3. Set environment variables: `QED_PUBLIC_URL`, `QED_PARTNERS_URL` (or AgentCore
-   Gateway targets for real partner APIs), `QED_LLM=bedrock`, `AWS_REGION`,
-   `QED_GUARDRAIL_ID`, and `QED_BACKUP_S3_BUCKET`.
-4. Point the Alexa+ add-on manifest (`alexa/addon-package/addon.json`) at the
+3. Set environment variables: `PLEXIS_PUBLIC_URL`, `PLEXIS_PARTNERS_URL` (or AgentCore
+   Gateway targets for real partner APIs), `PLEXIS_LLM=bedrock`, `AWS_REGION`,
+   `PLEXIS_GUARDRAIL_ID`, and `PLEXIS_BACKUP_S3_BUCKET`.
+4. Point the Alexa+ add-on manifest (`deploy/alexa-addon/addon.json`) at the
    runtime URL and run `alexa-ai deploy`.
 
 ## Known gap
 
 The Alexa+ quickstart expects unauthenticated requests to get a 401 *without* a
 `WWW-Authenticate` header, while the MCP spec requires one. Plexis strips it when
-`QED_ALEXA_COMPAT_401=true` (the container default). If an AgentCore inbound
+`PLEXIS_ALEXA_COMPAT_401=true` (the container default). If an AgentCore inbound
 authorizer answers the 401 before Plexis sees the request, Plexis can't strip the
-header. Check how the runtime responds before submitting (unverified, see
-`FRICTION_LOG.md`).
+header. Check how the runtime responds before submitting (not yet verified).

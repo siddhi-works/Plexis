@@ -5,8 +5,8 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from qed.partners.client import McpPartners, PartnerError
-from qed.resilience import CircuitBreaker, TTLCache
+from plexis.partners.client import McpPartners, PartnerError
+from plexis.resilience import CircuitBreaker, TTLCache
 from tests.conftest import TRIP_DAY
 
 pytestmark = pytest.mark.chaos

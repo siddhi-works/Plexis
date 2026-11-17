@@ -1,25 +1,25 @@
 services:
   partners:
     build: .
-    command: ["qed", "partners"]
+    command: ["plexis", "partners"]
     environment:
-      QED_HOST: 0.0.0.0
-      QED_PARTNERS_PORT: "9100"
+      PLEXIS_HOST: 0.0.0.0
+      PLEXIS_PARTNERS_PORT: "9100"
     ports: ["9100:9100"]
-  qed:
+  plexis:
     build: .
     depends_on: [partners]
     environment:
-      QED_HOST: 0.0.0.0
-      QED_DEV_MODE: "true"
-      QED_PARTNERS_URL: http://partners:9100
-      QED_ALLOWED_ORIGINS: http://localhost:5173
+      PLEXIS_HOST: 0.0.0.0
+      PLEXIS_DEV_MODE: "true"
+      PLEXIS_PARTNERS_URL: http://partners:9100
+      PLEXIS_ALLOWED_ORIGINS: http://localhost:5173
       # Optional: Amazon Bedrock (Nova) parsing + phrasing, Bedrock Guardrails, S3 ledger backups
-      QED_LLM: ${QED_LLM:-off}
+      PLEXIS_LLM: ${PLEXIS_LLM:-off}
       AWS_REGION: ${AWS_REGION:-us-east-1}
-      QED_GUARDRAIL_ID: ${QED_GUARDRAIL_ID:-}
-      QED_BACKUP_S3_BUCKET: ${QED_BACKUP_S3_BUCKET:-}
+      PLEXIS_GUARDRAIL_ID: ${PLEXIS_GUARDRAIL_ID:-}
+      PLEXIS_BACKUP_S3_BUCKET: ${PLEXIS_BACKUP_S3_BUCKET:-}
     ports: ["8000:8000"]
-    volumes: ["qed-state:/app/var"]
+    volumes: ["plexis-state:/app/var"]
 volumes:
-  qed-state: {}
+  plexis-state: {}

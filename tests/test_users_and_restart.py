@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import pytest
 
-from qed.agent.dialog import Dialog
-from qed.engine import Engine
-from qed.partners.client import LocalPartners
-from qed.users import CURRENT_USER, DEMO_USER
+from plexis.agent.dialog import Dialog
+from plexis.engine import Engine
+from plexis.partners.client import LocalPartners
+from plexis.users import CURRENT_USER, DEMO_USER
 from tests.conftest import WHEN
 
 DEMO = DEMO_USER
@@ -30,7 +30,7 @@ class As:
 
 
 async def test_memory_is_per_user(engine: Engine) -> None:
-    from qed.companion.profile import interpret
+    from plexis.companion.profile import interpret
 
     with As("alice"):
         for cand in interpret("We prefer no AC"):
@@ -72,7 +72,7 @@ async def test_same_trip_gives_each_customer_their_own_plan(engine: Engine) -> N
 
 
 async def test_one_guest_cannot_teach_plexis_for_the_next(engine: Engine) -> None:
-    from qed.users import GUEST, start_request
+    from plexis.users import GUEST, start_request
 
     start_request(GUEST)
     engine.learner.teach("When I say beachy I mean near the beach")

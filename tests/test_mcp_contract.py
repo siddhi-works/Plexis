@@ -117,8 +117,8 @@ async def test_discovery_and_tool_contract(live_stack) -> None:  # type: ignore[
             assert t.description and t.input_schema["type"] == "object"
             assert t.output_schema is not None, f"{t.name} must declare an outputSchema"
         plan = next(t for t in tools if t.name == "plan_trip")
-        assert plan.meta["ui"]["resourceUri"] == "ui://qed/trip-card.html"
-        card = await s.read_resource("ui://qed/trip-card.html")
+        assert plan.meta["ui"]["resourceUri"] == "ui://plexis/trip-card.html"
+        card = await s.read_resource("ui://plexis/trip-card.html")
         assert card.contents[0].mime_type == "text/html;profile=mcp-app"
         return tools
 
@@ -260,7 +260,7 @@ async def test_health_readiness_and_metrics(live_stack) -> None:  # type: ignore
     ready = httpx.get(f"{base}/readyz").json()
     assert ready["ready"] and ready["ledger"]["ok"]
     metrics = httpx.get(f"{base}/metrics").text
-    assert "qed_compile_seconds" in metrics and "qed_stage_seconds" in metrics
+    assert "plexis_compile_seconds" in metrics and "plexis_stage_seconds" in metrics
     r = httpx.get(f"{base}/healthz")
     assert r.headers["x-content-type-options"] == "nosniff"
 
@@ -290,9 +290,9 @@ async def test_alexa_compat_401_omits_www_authenticate(tmp_path) -> None:  # typ
 
     from starlette.testclient import TestClient
 
-    from qed.config import Settings
-    from qed.partners.client import LocalPartners
-    from qed.server.app import create_app
+    from plexis.config import Settings
+    from plexis.partners.client import LocalPartners
+    from plexis.server.app import create_app
 
     app = create_app(replace(Settings(), state_dir=tmp_path, alexa_compat_401=True), partners=LocalPartners())
     r = TestClient(app).post("/mcp", json={"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}})

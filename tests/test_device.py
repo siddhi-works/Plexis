@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from qed.device.audio import clean_transcript
-from qed.device.device import Context, route
+from plexis.device.audio import clean_transcript
+from plexis.device.device import Context, route
 
 
 def test_answers_mid_conversation_stay_in_the_conversation() -> None:

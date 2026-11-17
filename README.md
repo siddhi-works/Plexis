@@ -6,11 +6,11 @@ You talk to it like a person. It plans with a constraint solver, re-checks every
 
 Built for the Amazon Developer Hackathon (Alexa+ track) as an **Alexa+ add-on**: an MCP server that Alexa+ (or any MCP client) talks to.
 
-<p align="center"><img src="docs/plexis-demo.gif" width="640" alt="Plexis demo: a family trip request becomes a proven plan"></p>
+<p align="center"><img src="docs/media/plexis-demo.gif" width="640" alt="Plexis demo: a family trip request becomes a proven plan"></p>
 
-![Plexis proving a plan: 21 of 21 checks, each tied to the words that asked for it, plus a signed receipt ledger verified in the browser](docs/plexis-proof.png)
+![Plexis proving a plan: 21 of 21 checks, each tied to the words that asked for it, plus a signed receipt ledger verified in the browser](docs/media/plexis-proof.png)
 
-*Above: "3 nights in San Diego for me, Grandma and Maya, under $3,000, step-free room with a pool." Every rule is checked and linked to the words (or the remembered household fact) behind it, and the receipts are re-verified in the browser.* [Full demo video (1:38)](Plexis_demo.mp4)
+*Above: "3 nights in San Diego for me, Grandma and Maya, under $3,000, step-free room with a pool." Every rule is checked and linked to the words (or the remembered household fact) behind it, and the receipts are re-verified in the browser.* [Full demo video (1:38)](docs/media/plexis-demo.mp4)
 
 ## What it does
 
@@ -40,7 +40,7 @@ flowchart LR
 
 ## Results
 
-`qed bench --n 80`: seeded requests, with the independent verifier as the judge.
+`plexis bench --n 80` ([full results](docs/benchmark/bench.md)): seeded requests, with the independent verifier as the judge.
 
 | | Plexis | Greedy | Filter-greedy |
 |---|---|---|---|
@@ -53,7 +53,7 @@ flowchart LR
 
 ```bash
 uv venv && uv pip install -e ".[dev]"
-qed dev                                    # the add-on plus its partner services
+plexis dev                                    # the add-on plus its partner services
 npm --prefix simulator install && npm --prefix simulator run dev
 ```
 
@@ -63,9 +63,9 @@ Open http://localhost:5173: a simulated Alexa+ host that is a real MCP client. I
 
 ```bash
 uv pip install -e ".[voice]"
-qed voice                  # hands-free: pause naturally, interrupt any time
-qed voice --headphones     # stops the instant you start talking
-qed voice --text           # type instead of talking
+plexis voice                  # hands-free: pause naturally, interrupt any time
+plexis voice --headphones     # stops the instant you start talking
+plexis voice --text           # type instead of talking
 ```
 
 For a natural voice that runs on your PC, also install `.[kokoro]`; the model (about 340 MB) downloads on first use. Without it, Plexis uses Microsoft's online neural voices and falls back to the system voice.
@@ -77,7 +77,7 @@ Python · MCP Python SDK (protocol 2025-11-25, Streamable HTTP) · OR-Tools CP-S
 <details>
 <summary><b>Engineering details</b></summary>
 
-- **Alexa+ add-on conventions:** `structuredContent` with an `outputSchema`, `_meta.ui` pointing to an MCP App card for Echo Show, elicitation for payment consent and fix-it choices, duplicate-booking protection, two-tier OAuth (`client_credentials` for discovery, PKCE `authorization_code` for personal actions), and an `addon.json` manifest in `alexa/addon-package/`.
+- **Alexa+ add-on conventions:** `structuredContent` with an `outputSchema`, `_meta.ui` pointing to an MCP App card for Echo Show, elicitation for payment consent and fix-it choices, duplicate-booking protection, two-tier OAuth (`client_credentials` for discovery, PKCE `authorization_code` for personal actions), and an `addon.json` manifest in `deploy/alexa-addon/`.
 - **Partners:** 8 partner MCP servers (transport, stays, dining, experiences, weather, wallet, guide, a simulated front desk), queried in parallel.
 - **Per-user privacy:** memory, learning, plans, trips and conversations belong to the signed-in user. Plan IDs are random and can't be derived from public receipts. Unlinked guests get no memory.
 - **Durability:** plans and booked trips are stored in SQLite and re-verified after a restart, so cancellation monitoring survives restarts.
@@ -96,6 +96,16 @@ Python · MCP Python SDK (protocol 2025-11-25, Streamable HTTP) · OR-Tools CP-S
 - Real Alexa+ add-on access is partner-only, so the simulator stands in for Alexa+.
 - Bedrock and AgentCore are coded and degrade cleanly without credentials, but they have not been run live.
 
-## More
+## Repository layout
 
-[SUBMISSION.md](SUBMISSION.md) (Devpost text) · [FRICTION_LOG.md](FRICTION_LOG.md) · [PRODUCT_FEEDBACK.md](PRODUCT_FEEDBACK.md) · [DEMO_SCRIPT.md](DEMO_SCRIPT.md) · [MIT license](LICENSE)
+```
+src/plexis/     the add-on: dialog agent, solver, verifier, receipts, MCP server, voice device
+tests/          105 tests (unit, property, contract, chaos, privacy, timing)
+simulator/      a simulated Alexa+ host (React + MCP TypeScript SDK)
+deploy/         Alexa+ add-on manifest, AWS AgentCore guide, agent skill
+docs/           demo media and benchmark results
+```
+
+## License
+
+[MIT](LICENSE)

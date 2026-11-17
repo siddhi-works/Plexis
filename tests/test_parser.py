@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from qed.compiler.rules import parse
+from plexis.compiler.rules import parse
 from tests.conftest import WHEN
 
 
@@ -76,7 +76,7 @@ def test_no_flights_before_does_not_ban_flying() -> None:
 
 def test_unknown_phrases_become_warnings_not_silent_drops() -> None:
     intent = parse(f"3 nights from Chicago to Miami on {WHEN} near the beach")
-    warnings = [d for d in intent.diagnostics if d.code == "QED-W001"]
+    warnings = [d for d in intent.diagnostics if d.code == "PLX-W001"]
     assert any("beach" in d.message for d in warnings)
     assert intent.coverage < 1.0
 

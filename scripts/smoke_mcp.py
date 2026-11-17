@@ -1,4 +1,4 @@
-"""End-to-end smoke test against a running `qed dev`: OAuth tiers, discovery, plan, book, disruption."""
+"""End-to-end smoke test against a running `plexis dev`: OAuth tiers, discovery, plan, book, disruption."""
 
 from __future__ import annotations
 
@@ -146,7 +146,7 @@ async def main() -> None:
         )
         print("call ->", res.structured_content["speech"][:160])
         print("trip", trip)
-        card = await s.read_resource("ui://qed/trip-card.html")
+        card = await s.read_resource("ui://plexis/trip-card.html")
         print("card resource mime:", card.contents[0].mime_type, len(card.contents[0].text))
     print("notifications:", notes[:3])
 

@@ -3,7 +3,7 @@ import { CardFrame } from "./components/CardFrame";
 import { Console, type CallRecord } from "./components/Console";
 import { ElicitSheet } from "./components/ElicitSheet";
 import { route, type HostContext } from "./host";
-import { getToken, QedClient, type ElicitAnswer, type ElicitAsk, type TraceEvent } from "./mcp";
+import { getToken, PlexisClient, type ElicitAnswer, type ElicitAsk, type TraceEvent } from "./mcp";
 import { isSpeaking, listen, matchSpoken, speak, speechSupported, stopSpeaking, type ListenEnd } from "./voice";
 
 type Turn = { who: "you" | "assistant" | "notice"; text: string; tool?: string };
@@ -50,7 +50,7 @@ export default function App() {
   const [ledgerTick, setLedgerTick] = useState(0);
   const [bookedOutbound, setBookedOutbound] = useState<string | undefined>();
   const ctx = useRef<HostContext>({});
-  const client = useRef<QedClient | null>(null);
+  const client = useRef<PlexisClient | null>(null);
   const cardHtml = useRef<string>("");
   const stopListen = useRef<() => void>(() => {});
   const askRef = useRef(ask);
@@ -116,7 +116,7 @@ export default function App() {
       try {
         await client.current?.close();
         const { token, scope } = await getToken(linked);
-        const c = new QedClient({
+        const c = new PlexisClient({
           onTrace: (e) => setTrace((t) => [...t.slice(-400), e]),
           onElicit: (a) => new Promise<ElicitAnswer>((resolve) => {
             setAsk({ ...a, resolve });
@@ -125,7 +125,7 @@ export default function App() {
             setTimeout(() => { if (askRef.current?.message === a.message) { resolve({ action: "cancel" }); setAsk(null); } }, 55_000);
           }),
           onNotify: (kind, data) => {
-            if (kind === "log" && data?.type === "qed/disruption") {
+            if (kind === "log" && data?.type === "plexis/disruption") {
               setAlert(data.message);
               setTurns((t) => [...t, { who: "notice", text: data.message }]);
               ctx.current.lastStatus = "disrupted";
@@ -135,13 +135,13 @@ export default function App() {
           },
         });
         await c.connect(token);
-        cardHtml.current = await c.readText("ui://qed/trip-card.html");
+        cardHtml.current = await c.readText("ui://plexis/trip-card.html");
         if (cancelled) return c.close();
         client.current = c;
         setStatus("ready");
         setStatusText(`Add-on "${c.serverName}" over MCP ${c.protocolVersion}, ${c.tools.length} tools, token scope: ${scope}`);
       } catch (e) {
-        if (!cancelled) { setStatus("error"); setStatusText(`Can't reach the add-on at its MCP endpoint. Start it with "qed dev". (${e})`); }
+        if (!cancelled) { setStatus("error"); setStatusText(`Can't reach the add-on at its MCP endpoint. Start it with "plexis dev". (${e})`); }
       }
     })();
     return () => { cancelled = true; };

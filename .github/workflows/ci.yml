@@ -21,19 +21,21 @@ jobs:
       - name: Lint (ruff)
         run: uv run ruff check src tests
       - name: Security lint (bandit)
-        run: uv run bandit -q -r src -x src/qed/eval
+        run: uv run bandit -q -r src -x src/plexis/eval
       - name: Dependency audit (pip-audit)
         run: uvx pip-audit --skip-editable || true
       - name: Tests (unit, property, contract, chaos) with coverage
         env:
           AWS_EC2_METADATA_DISABLED: "true"
-        run: uv run pytest -q --cov=qed --cov-report=term --cov-fail-under=70
-      - name: Benchmark (QED vs baselines)
-        run: uv run qed bench --n 40 --out eval/results-ci
+        run: uv run pytest -q -m "not timing" --cov=plexis --cov-report=term --cov-fail-under=70
+      - name: Latency budget (no coverage tracing)
+        run: uv run pytest -q -m timing
+      - name: Benchmark (Plexis vs baselines)
+        run: uv run plexis bench --n 40 --out bench-ci
       - uses: actions/upload-artifact@v4
         with:
           name: bench
-          path: eval/results-ci/bench.md
+          path: bench-ci/bench.md
 
   simulator:
     runs-on: ubuntu-latest

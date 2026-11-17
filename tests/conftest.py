@@ -13,10 +13,10 @@ import httpx
 import pytest
 import uvicorn
 
-from qed.config import Settings
-from qed.domain import world
-from qed.engine import Engine
-from qed.partners.client import LocalPartners
+from plexis.config import Settings
+from plexis.domain import world
+from plexis.engine import Engine
+from plexis.partners.client import LocalPartners
 
 # A date safely in the future whenever the suite runs, phrased the way people speak.
 TRIP_DAY = world.today() + timedelta(days=30)
@@ -25,7 +25,7 @@ WHEN = f"{TRIP_DAY.strftime('%B')} {TRIP_DAY.day}"
 
 @pytest.fixture
 def settings(tmp_path: Path) -> Settings:
-    os.environ["QED_STATE_DIR"] = str(tmp_path)
+    os.environ["PLEXIS_STATE_DIR"] = str(tmp_path)
     s = Settings()
     return replace(s, state_dir=tmp_path, solver_workers=4, backup_every=0)
 
@@ -67,9 +67,9 @@ class Running:
 
 @pytest.fixture(scope="session")
 def live_stack(tmp_path_factory: pytest.TempPathFactory) -> Iterator[dict[str, object]]:
-    """Partners + QED over real HTTP, as `qed dev` runs them."""
-    from qed.partners.servers import build_app
-    from qed.server.app import create_app
+    """Partners + Plexis over real HTTP, as `plexis dev` runs them."""
+    from plexis.partners.servers import build_app
+    from plexis.server.app import create_app
 
     state = tmp_path_factory.mktemp("live")
     pport, qport = free_port(), free_port()

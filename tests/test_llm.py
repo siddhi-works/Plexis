@@ -7,8 +7,8 @@ from dataclasses import replace
 
 import pytest
 
-from qed.engine import Engine
-from qed.partners.client import LocalPartners
+from plexis.engine import Engine
+from plexis.partners.client import LocalPartners
 from tests.conftest import WHEN
 
 pytestmark = pytest.mark.asyncio
@@ -18,7 +18,7 @@ async def test_llm_proposals_must_quote_the_request(settings) -> None:  # type: 
     eng = Engine(replace(settings, llm_mode="bedrock"), LocalPartners(), seed_demo_household=False)
 
     async def fake_parse(utterance, unresolved):  # type: ignore[no-untyped-def]
-        from qed.guard import check_llm_provenance
+        from plexis.guard import check_llm_provenance
 
         proposals = [
             {"kind": "category_min", "params": {"category": "park", "count": 1}, "quote": "somewhere green"},
@@ -34,7 +34,7 @@ async def test_llm_proposals_must_quote_the_request(settings) -> None:  # type: 
     assert ("category_min", "somewhere green") in kinds
     assert all(c.kind != "budget_max" for c in res.intent.constraints), "a hallucinated rule must be dropped"
     codes = {d.code for d in res.intent.diagnostics}
-    assert {"QED-W011", "QED-W012"} <= codes
+    assert {"PLX-W011", "PLX-W012"} <= codes
     assert res.intent.parser == "rules+bedrock"
 
 

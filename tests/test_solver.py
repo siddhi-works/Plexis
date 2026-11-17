@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from qed.ir import BudgetMax, DepartAfter, StayAccessible, StayMinRating
-from qed.solver import z3check
-from qed.solver.cpsat import TripModel
-from qed.solver.diagnose import explain_conflict, minimal_core, why_not
-from qed.verify.checker import verify
+from plexis.ir import BudgetMax, DepartAfter, StayAccessible, StayMinRating
+from plexis.solver import z3check
+from plexis.solver.cpsat import TripModel
+from plexis.solver.diagnose import explain_conflict, minimal_core, why_not
+from plexis.verify.checker import verify
 from tests.conftest import TRIP_DAY
 from tests.helpers import catalog_for, make_intent
 

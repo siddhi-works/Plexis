@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import pytest
 
-from qed.ir import BudgetMax, DietAll, StayAccessible
-from qed.solver.cpsat import TripModel
-from qed.solver.plan import Plan
-from qed.verify.checker import verify
+from plexis.ir import BudgetMax, DietAll, StayAccessible
+from plexis.solver.cpsat import TripModel
+from plexis.solver.plan import Plan
+from plexis.verify.checker import verify
 from tests.conftest import TRIP_DAY
 from tests.helpers import catalog_for, make_intent
 

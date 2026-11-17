@@ -37,8 +37,6 @@ Thumbs.db
 # Local tool configuration
 .claude/
 
-# Benchmark scratch state (contains generated keys)
-eval/**/state/
-
-# Local submission deliverables
-Plexis_Devpost_Submission.pdf
+# Benchmark output from CI and scratch state (may contain generated keys)
+bench-ci/
+docs/benchmark/**/state/

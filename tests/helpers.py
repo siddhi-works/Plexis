@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 
-from qed.domain import world
-from qed.ir import ActivitiesPerDay, TripIntent
-from qed.solver.catalog import Catalog
+from plexis.domain import world
+from plexis.ir import ActivitiesPerDay, TripIntent
+from plexis.solver.catalog import Catalog
 
 
 def catalog_for(intent: TripIntent) -> Catalog:
