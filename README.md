@@ -8,10 +8,6 @@ Most AI travel agents let a language model write the itinerary and ask you to do
 
 Built as an Alexa+ add-on (a self-hosted MCP server) for Amazon's *Build, Ship, Shape* Developer Hackathon.
 
-<p align="center"><img src="docs/media/plexis-demo.gif" width="420" alt="Plexis demo"></p>
-
-<p align="center"><a href="docs/media/plexis-demo.mp4">Watch the launch video (1:12)</a></p>
-
 ## Highlights
 
 - **Solved, not generated.** OR-Tools CP-SAT finds the best plan that satisfies every rule, or proves none exists.
