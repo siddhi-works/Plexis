@@ -1,11 +1,17 @@
 [project]
 name = "plexis"
 version = "0.1.0"
-description = "Plexis: an intent compiler for Alexa+. Turns spoken requests into plans that come with a machine-checkable proof."
+description = "A trip-planning agent for Alexa+ that solves and independently verifies every plan instead of letting a language model decide."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
-authors = [{ name = "Plexis contributors" }]
+authors = [{ name = "Siddhi Kale" }]
+keywords = ["alexa", "mcp", "constraint-programming", "or-tools", "z3", "ai-agents", "travel"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
   "mcp>=1.23,<2.2",
   "ortools>=9.15",
@@ -25,6 +31,9 @@ dependencies = [
   "strands-agents>=1.0",
   "langgraph>=1.2",
 ]
+
+[project.urls]
+Repository = "https://github.com/siddhi-works/Plexis"
 
 [project.optional-dependencies]
 voice = [

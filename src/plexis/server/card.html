@@ -107,7 +107,7 @@
         </article>`).join("")}</section>
       <section class="panel"><h2>Why you can trust it</h2><div class="rules">${(d.rules || []).map((r) => `
         <div class="rule"><span style="color:${r.passed ? "var(--ok)" : "var(--err)"}">${r.passed ? "✓" : "✗"}</span>
-          <span>${esc(r.text)} <span class="o src-${esc(r.origin)}">· ${esc(ORIGIN[r.origin] || r.origin)}${r.words ? ` “${esc(r.words)}”` : ""}${r.because ? ` — ${esc(r.because)}` : ""}</span>
+          <span>${esc(r.text)} <span class="o src-${esc(r.origin)}">· ${esc(ORIGIN[r.origin] || r.origin)}${r.words ? ` “${esc(r.words)}”` : ""}${r.because ? `, ${esc(r.because)}` : ""}</span>
           <div class="d sub" style="font-size:.78em">${esc(r.evidence || "")}</div></span></div>`).join("")}</div></section>
       ${d.highlights?.places?.length ? `<section class="panel"><h2>Worth seeing in ${esc(t.destName)}</h2><div class="rules">${d.highlights.places.slice(0, 5).map((p) => `<div class="rule"><span aria-hidden="true">★</span><span>${esc(p.name)}<div class="d sub" style="font-size:.78em">${esc(p.why)}</div></span></div>`).join("")}</div><div class="sub" style="font-size:.72em;margin-top:.4rem">Suggestions from ${esc(d.highlights.source)}. Not part of the verified plan.</div></section>` : ""}
       ${d.untrusted?.length ? `<section class="panel"><span class="badge warn">⚠ ${d.untrusted.length} listing(s) contained instructions aimed at AI agents. They were ignored.</span></section>` : ""}

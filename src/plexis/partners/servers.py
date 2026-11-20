@@ -1,4 +1,4 @@
-"""Simulated partner ecosystem: seven independent MCP servers.
+"""Simulated partner ecosystem: eight independent MCP servers.
 
 In production these would be the airline, hotel, restaurant, ticketing,
 weather, payments and telephony partners that Alexa+ add-ons integrate with.

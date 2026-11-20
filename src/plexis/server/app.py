@@ -165,7 +165,7 @@ def build_server(engine: Engine, settings: Settings, authority: Authority | None
         )
     server = MCPServer(
         "plexis",
-        title="Plexis — trips you can trust",
+        title="Plexis: trips you can trust",
         description="Verified trip planning for Alexa+: every plan is solved, independently checked and signed.",
         instructions=(
             "Use plan_trip for any new trip request, passing the customer's words verbatim. Use refine_trip "

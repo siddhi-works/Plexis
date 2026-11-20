@@ -34,8 +34,6 @@ Thumbs.db
 .idea/
 .vscode/
 
-# Local tool configuration
-.claude/
 
 # Benchmark output from CI and scratch state (may contain generated keys)
 bench-ci/
