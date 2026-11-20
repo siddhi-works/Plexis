@@ -1,12 +1,14 @@
 # Plexis
 
-[![CI](https://github.com/siddhi-works/Plexis/actions/workflows/ci.yml/badge.svg)](https://github.com/siddhi-works/Plexis/actions/workflows/ci.yml) ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue) ![MCP 2025-11-25](https://img.shields.io/badge/MCP-2025--11--25-6366f1) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![CI](https://github.com/siddhi-works/Plexis/actions/workflows/ci.yml/badge.svg)](https://github.com/siddhi-works/Plexis/actions/workflows/ci.yml) ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue) ![Alexa+ add-on](https://img.shields.io/badge/Alexa%2B-add--on-00CAFF) ![MCP 2025-11-25](https://img.shields.io/badge/MCP-2025--11--25-6366f1) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 **A trip-planning agent where the language model never decides the trip.**
 
 Most AI travel agents let a language model write the itinerary and ask you to double-check it. Plexis compiles your request into exact rules, uses a constraint solver to find a plan that satisfies all of them, and has an independent checker verify the result before anything is said or booked. If the request is impossible, it names the rules that clash and the smallest change that fixes it. Every plan comes with a signed, tamper-evident receipt.
 
-Built as an Alexa+ add-on (a self-hosted MCP server) for Amazon's *Build, Ship, Shape* Developer Hackathon.
+Built as an **Alexa+ add-on** for Amazon's *Build, Ship, Shape* Developer Hackathon: a self-hosted MCP server (protocol 2025-11-25, Streamable HTTP), the integration standard Alexa+ uses for third-party experiences. It is demonstrated through an MCP-compatible Alexa+ simulator, since native Alexa+ deployment requires partner access.
+
+**Built with:** Alexa+ add-on (MCP) · Google OR-Tools CP-SAT · Z3 · LangGraph · Amazon Bedrock via Strands Agents · Ed25519 · SQLite · Pipecat · React + MCP TypeScript SDK · Docker · AWS AgentCore
 
 ## Highlights
 
